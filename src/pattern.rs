@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use tiny_skia::{Path, PathBuilder, Pixmap, Paint, Stroke, LineCap, Transform, FillRule, Color, LinearGradient, SpreadMode, GradientStop};
 
-use crate::{coord::Coord, direction::Direction, angle::Angle, hex_coord::HexCoord, dynamic_list::DynamicList, draw_options::{Intersections, Lines, Marker, Triangle}};
+use crate::{coord::Coord, direction::Direction, angle::Angle, hex_coord::HexCoord, dynamic_list::DynamicList, draw_options::{Intersections, Lines, Marker, Triangle, GradientOptions}};
 
 #[derive(Debug, Clone)]
 pub struct Pattern {
@@ -83,31 +83,15 @@ impl Pattern {
                 self.draw_monocolor(pixmap, &stroke, origin, line_length, *color);
                 end_colors = (*color, *color);
             },
-            Lines::Gradient(start_color, end_color) => {
-                end_colors = (*start_color, *end_color);
-                self.draw_gradient_lines(pixmap, &stroke, origin, line_length, &vec![*start_color, *end_color],1);
-            },
-            Lines::MultiGradient(colors) => {
-                if colors.len() == 0 {
-                    let col = *colors.get(0).unwrap_or(&Color::WHITE);
+            Lines::Gradient(gradient_options) => {
+                if gradient_options.colors.len() < 2 {
+                    let col = *gradient_options.colors.get(0).unwrap_or(&Color::WHITE);
                     end_colors = (col, col);
                     self.draw_monocolor(pixmap, &stroke, origin, line_length, col);
                 } else {
                     end_colors = (
-                        colors[0],
-                        self.draw_gradient_lines(pixmap, &stroke, origin, line_length, colors, 1)
-                    );
-                }
-            },
-            Lines::BoundGradient(colors, seg_per_grad) => {
-                if colors.len() == 0 {
-                    let col = *colors.get(0).unwrap_or(&Color::WHITE);
-                    end_colors = (col, col);
-                    self.draw_monocolor(pixmap, &stroke, origin, line_length, col);
-                } else {
-                    end_colors = (
-                        colors[0],
-                        self.draw_gradient_lines(pixmap, &stroke, origin, line_length, colors, *seg_per_grad)
+                        gradient_options.colors[0],
+                        self.draw_gradient_lines(pixmap, &stroke, origin, line_length, gradient_options)
                     );
                 }
             },
@@ -168,14 +152,14 @@ impl Pattern {
 
     fn draw_gradient_lines(&self, pixmap: &mut Pixmap, stroke: &Stroke,
         origin: HexCoord, line_length: f32, 
-        colors: &Vec<Color>, segs_per_grad: usize,
+        gradient_options: &GradientOptions,
     ) -> Color {
         let segments = self.path.len() as f32 - 1.0;
 
         let mut grad_colors = Vec::new();
 
-        for i in 0..colors.len().min(self.path.len()/segs_per_grad + 2) {
-            let col = colors[i];
+        for i in 0..gradient_options.colors.len().min(self.path.len()/gradient_options.segs_per_color + 2) {
+            let col = gradient_options.colors[i];
             grad_colors.push([col.red(), col.green(), col.blue(), col.alpha()]);
         }
 
@@ -200,8 +184,20 @@ impl Pattern {
         paint.anti_alias = false;
 
         let mut path_queue = Vec::new();
+
+        let mut visit_count: HashMap<Coord, usize> = HashMap::new();
+
+        if gradient_options.bent_corners {
+            for path in &self.path {
+                if let Some(count) = visit_count.get_mut(path) {
+                    *count += 1;
+                } else {
+                    visit_count.insert(*path, 1);
+                }
+            }
+        }
         for i in 1..self.path.len() {
-            let loc_next = origin + HexCoord::from(self.path[i]) * line_length;
+            let mut loc_next = origin + HexCoord::from(self.path[i]) * line_length;
             //let loc_prev = origin + HexCoord::from(self.path[i-1]) * line_length;
 
             let mut stops = vec![GradientStop::new(0.0, Color::from_rgba(cur_color[0], cur_color[1], cur_color[2], cur_color[3]).unwrap())];
@@ -231,8 +227,19 @@ impl Pattern {
             let mut pb = PathBuilder::new();
 
             pb.move_to(loc_prev.0, loc_prev.1);
-            pb.line_to(loc_next.0, loc_next.1);
 
+            if gradient_options.bent_corners && visit_count.get(&self.path[i]).unwrap() > &1 && self.path.len()-1 != i {
+                let bend_amount = 0.2;
+
+                let stop_point = loc_next - (loc_next - loc_prev)* bend_amount;
+                pb.line_to(stop_point.0, stop_point.1);
+
+                loc_next = loc_next + (origin + HexCoord::from(self.path[i+1])*line_length - loc_next) * bend_amount;
+                pb.line_to(loc_next.0, loc_next.1);
+            } else {
+                pb.line_to(loc_next.0, loc_next.1);
+            }
+            
             let path = pb.finish().unwrap();
 
             path_queue.push((path, shader));
@@ -240,13 +247,13 @@ impl Pattern {
             loc_prev = loc_next;
         }
 
-        for (path, shader) in path_queue {
+        for (path, shader) in path_queue.into_iter().rev() {
             paint.shader = shader;
 
             pixmap.stroke_path(&path, &paint, stroke, Transform::identity(), None);
         }
 
-        return colors[grad_colors.len()-1];
+        return gradient_options.colors[grad_colors.len()-1];
     }
 
     fn draw_segment_lines(&self, pixmap: &mut Pixmap, stroke: &Stroke,

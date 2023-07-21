@@ -3,12 +3,16 @@ use tiny_skia::Color;
 #[derive(Debug, Clone)]
 pub enum Lines {
     Monocolor(Color),
-    Gradient(Color, Color),
-    MultiGradient(Vec<Color>),
-    BoundGradient(Vec<Color>, usize),
+    Gradient(GradientOptions),
     SegmentColors(Vec<Color>, Triangle),
 }
 
+#[derive(Debug, Clone)]
+pub struct GradientOptions {
+    pub colors: Vec<Color>,
+    pub segs_per_color: usize,
+    pub bent_corners: bool,
+}
 #[derive(Debug, Clone)]
 pub enum Triangle {
     None,
