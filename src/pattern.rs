@@ -71,34 +71,34 @@ impl Pattern {
     }
 
 
-    pub fn draw_pattern(&self, pixmap: &mut Pixmap, origin: HexCoord, line_length: f32, line_thickness: f32, line_options: &Lines, point_options: &Intersections) {
+    pub fn draw_pattern(&self, pixmap: &mut Pixmap, origin: HexCoord, scale: f32, line_thickness: f32, line_options: &Lines, point_options: &Intersections) {
         let mut stroke = Stroke::default();
-        stroke.width = line_thickness;
+        stroke.width = line_thickness * scale;
         stroke.line_cap = LineCap::Round;
 
         let end_colors;
         
         match line_options {
             Lines::Monocolor(color) => {        
-                self.draw_monocolor(pixmap, &stroke, origin, line_length, *color);
+                self.draw_monocolor(pixmap, &stroke, origin, scale, *color);
                 end_colors = (*color, *color);
             },
             Lines::Gradient(gradient_options) => {
                 if gradient_options.colors.len() < 2 {
                     let col = *gradient_options.colors.get(0).unwrap_or(&Color::WHITE);
                     end_colors = (col, col);
-                    self.draw_monocolor(pixmap, &stroke, origin, line_length, col);
+                    self.draw_monocolor(pixmap, &stroke, origin, scale, col);
                 } else {
                     end_colors = (
                         gradient_options.colors[0],
-                        self.draw_gradient_lines(pixmap, &stroke, origin, line_length, gradient_options)
+                        self.draw_gradient_lines(pixmap, &stroke, origin, scale, gradient_options)
                     );
                 }
             },
             Lines::SegmentColors(colors, triangle) => {
                 end_colors = (
                     colors[0],
-                    self.draw_segment_lines(pixmap, &stroke, origin, line_length, colors, triangle),
+                    self.draw_segment_lines(pixmap, &stroke, origin, scale, colors, triangle),
                 );
             },
             
@@ -109,7 +109,7 @@ impl Pattern {
         match point_options {
             Intersections::Nothing => (),
             Intersections::UniformPoints(point) => {
-                Self::draw_points(&self.points, pixmap, origin, line_length, &point);
+                Self::draw_points(&self.points, pixmap, origin, scale, &point);
             },
             Intersections::EndsAndMiddle(beginning, end, middle) => {
                 let beginning_point = self.path[0];
@@ -118,19 +118,19 @@ impl Pattern {
                 let beginning = beginning.clone().into_point(end_colors.0);
                 let end = end.clone().into_point(end_colors.1);
                 
-                Self::draw_points(&vec![beginning_point], pixmap, origin, line_length, &beginning);
+                Self::draw_points(&vec![beginning_point], pixmap, origin, scale, &beginning);
                 if beginning_point != ending_point {
-                    Self::draw_points(&vec![ending_point], pixmap, origin, line_length, &end);
+                    Self::draw_points(&vec![ending_point], pixmap, origin, scale, &end);
                 }
                 let middle_points: Vec<Coord> = self.points.clone().into_iter().filter(|&point| point != beginning_point && point != ending_point).collect();
                 
-                Self::draw_points(&middle_points, pixmap, origin, line_length, &middle);
+                Self::draw_points(&middle_points, pixmap, origin, scale, &middle);
             },  
         }
     }
 
     pub fn draw_monocolor(&self, pixmap: &mut Pixmap, stroke: &Stroke,
-        origin: HexCoord, line_length: f32, 
+        origin: HexCoord, scale: f32, 
         color: Color
     ) {
         let mut pb = PathBuilder::new();
@@ -138,7 +138,7 @@ impl Pattern {
         pb.move_to(origin.0, origin.1);
 
         for line in &self.path {
-            let current = HexCoord::from(*line) * line_length + origin;
+            let current = HexCoord::from(*line) * scale + origin;
             
             pb.line_to(current.0, current.1);
         }
@@ -151,7 +151,7 @@ impl Pattern {
     }
 
     fn draw_gradient_lines(&self, pixmap: &mut Pixmap, stroke: &Stroke,
-        origin: HexCoord, line_length: f32, 
+        origin: HexCoord, scale: f32, 
         gradient_options: &GradientOptions,
     ) -> Color {
         let segments = self.path.len() as f32 - 1.0;
@@ -179,7 +179,7 @@ impl Pattern {
 
         let mut paint = Paint::default();
 
-        let mut loc_prev = origin + HexCoord::from(self.path[0]) * line_length;
+        let mut loc_prev = origin + HexCoord::from(self.path[0]) * scale;
 
         paint.anti_alias = false;
 
@@ -197,8 +197,8 @@ impl Pattern {
             }
         }
         for i in 1..self.path.len() {
-            let mut loc_next = origin + HexCoord::from(self.path[i]) * line_length;
-            //let loc_prev = origin + HexCoord::from(self.path[i-1]) * line_length;
+            let mut loc_next = origin + HexCoord::from(self.path[i]) * scale;
+            //let loc_prev = origin + HexCoord::from(self.path[i-1]) * scale;
 
             let mut stops = vec![GradientStop::new(0.0, Color::from_rgba(cur_color[0], cur_color[1], cur_color[2], cur_color[3]).unwrap())];
 
@@ -234,7 +234,7 @@ impl Pattern {
                 let stop_point = loc_next - (loc_next - loc_prev)* bend_amount;
                 pb.line_to(stop_point.0, stop_point.1);
 
-                loc_next = loc_next + (origin + HexCoord::from(self.path[i+1])*line_length - loc_next) * bend_amount;
+                loc_next = loc_next + (origin + HexCoord::from(self.path[i+1])*scale - loc_next) * bend_amount;
                 pb.line_to(loc_next.0, loc_next.1);
             } else {
                 pb.line_to(loc_next.0, loc_next.1);
@@ -257,7 +257,7 @@ impl Pattern {
     }
 
     fn draw_segment_lines(&self, pixmap: &mut Pixmap, stroke: &Stroke,
-        origin: HexCoord, line_length: f32, 
+        origin: HexCoord, scale: f32, 
         colors: &Vec<Color>, triangles: &Triangle,
     ) -> Color {
         let mut visited_points: HashMap<Coord, Vec<usize>> = HashMap::new();
@@ -272,7 +272,7 @@ impl Pattern {
 
         for i in 0..self.path.len() {
             let point = &self.path[i];
-            let loc = origin + HexCoord::from(*point) * line_length;
+            let loc = origin + HexCoord::from(*point) * scale;
             
             if !visited_points.contains_key(point) {
                 visited_points.insert(*point, Vec::new());
@@ -283,7 +283,7 @@ impl Pattern {
                 cur_path_builder.line_to(loc.0, loc.1);
                 visited_colors.push(cur_color);
             } else {
-                let prev_loc = origin + HexCoord::from(self.path[i-1]) * line_length;
+                let prev_loc = origin + HexCoord::from(self.path[i-1]) * scale;
                 
                 let middle = (loc - prev_loc)/2.0 + prev_loc;
 
@@ -340,16 +340,16 @@ impl Pattern {
         }
 
         for (triangle, location, next) in triangle_queue {
-            Self::draw_triangle(triangle, pixmap, location, next);
+            Self::draw_triangle(triangle, pixmap, location, next, scale);
         }
         
-        let cur_loc = origin + HexCoord::from(self.path[1]) * line_length;
-        let prev_loc = origin + HexCoord::from(self.path[0]) * line_length;
+        let cur_loc = origin + HexCoord::from(self.path[1]) * scale;
+        let prev_loc = origin + HexCoord::from(self.path[0]) * scale;
         let mid_point = (cur_loc - prev_loc)/2.0 + prev_loc;
         match triangles {
             Triangle::None => (),
             Triangle::Match(r) => {
-                Self::draw_triangle(Marker::SinglePoint(colors[0], *r), pixmap, mid_point, cur_loc);
+                Self::draw_triangle(Marker::SinglePoint(colors[0], *r), pixmap, mid_point, cur_loc, scale);
             }
             Triangle::BorderMatch(r1, c2, r2) 
             | Triangle::BorderStartMatch(r1, c2, r2) => {
@@ -359,29 +359,29 @@ impl Pattern {
                 } else {
                     marker = Marker::DoublePoint(*c2, *r2, colors[0], *r1);
                 }
-                Self::draw_triangle(marker, pixmap, mid_point, cur_loc);
+                Self::draw_triangle(marker, pixmap, mid_point, cur_loc, scale);
             },
         }
 
         colors[cur_color]
     }
 
-    pub fn draw_triangle(triangle: Marker, pixmap: &mut Pixmap, location: HexCoord, next: HexCoord) {
+    pub fn draw_triangle(triangle: Marker, pixmap: &mut Pixmap, location: HexCoord, next: HexCoord, scale: f32) {
         let mut paint = Paint::default();
 
         match triangle {
             Marker::None => (),
             Marker::SinglePoint(color, radius) => {
-                let path = Self::generate_triangle_path(location, next, radius);
+                let path = Self::generate_triangle_path(location, next, radius * scale);
                 paint.set_color(color);
                 pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
             },
             Marker::DoublePoint(c1, r1, c2, r2) => {
-                let path = Self::generate_triangle_path(location, next, r1);
+                let path = Self::generate_triangle_path(location, next, r1 * scale);
                 paint.set_color(c1);
                 pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
 
-                let path = Self::generate_triangle_path(location, next, r2);
+                let path = Self::generate_triangle_path(location, next, r2 * scale);
                 paint.set_color(c2);
                 pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
             },
@@ -418,7 +418,7 @@ impl Pattern {
         HexCoord(new_x, new_y) + center
     }
 
-    fn draw_points(points: &Vec<Coord>, pixmap: &mut Pixmap, origin: HexCoord, line_length: f32, point: &Marker) {
+    fn draw_points(points: &Vec<Coord>, pixmap: &mut Pixmap, origin: HexCoord, scale: f32, point: &Marker) {
         let mut paint = Paint::default();
 
         let mut paint2 = Paint::default();
@@ -428,8 +428,8 @@ impl Pattern {
             Marker::SinglePoint(color, radius) => {
                 paint.set_color(*color);
                 for point in points {
-                    let loc = HexCoord::from(*point) * line_length + origin;
-                    let path = PathBuilder::from_circle(loc.0, loc.1, *radius).unwrap();
+                    let loc = HexCoord::from(*point) * scale + origin;
+                    let path = PathBuilder::from_circle(loc.0, loc.1, *radius * scale).unwrap();
                     pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
                 }
             },
@@ -437,11 +437,11 @@ impl Pattern {
                 paint.set_color(*color1);
                 paint2.set_color(*color2);
                 for point in points {
-                    let loc = HexCoord::from(*point) * line_length + origin;
-                    let path = PathBuilder::from_circle(loc.0, loc.1, *radius1).unwrap();
+                    let loc = HexCoord::from(*point) * scale + origin;
+                    let path = PathBuilder::from_circle(loc.0, loc.1, *radius1 * scale).unwrap();
                     pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
 
-                    let path = PathBuilder::from_circle(loc.0, loc.1, *radius2).unwrap();
+                    let path = PathBuilder::from_circle(loc.0, loc.1, *radius2 * scale).unwrap();
                     pixmap.fill_path(&path, &paint2, FillRule::Winding, Transform::default(), None);
                 }
             },

@@ -29,7 +29,7 @@ pub enum Marker {
 }
 #[derive(Debug, Clone)]
 pub enum EndPoint {
-    EndMarker(Marker),
+    Marker(Marker),
     Match(f32),
     BorderedMatch(f32, Color, f32),
 }
@@ -43,14 +43,14 @@ pub enum Intersections {
 
 impl From<Marker> for EndPoint {
     fn from(value: Marker) -> Self {
-        EndPoint::EndMarker(value)
+        EndPoint::Marker(value)
     }
 }
 
 impl EndPoint {
     pub fn into_point(self, end_color: Color) -> Marker{
         match self {
-            Self::EndMarker(point) => point,
+            Self::Marker(point) => point,
             Self::Match(radius) => Marker::SinglePoint(end_color, radius),
             Self::BorderedMatch(r1, color, r2) => {
                 if r1 > r2 {
@@ -59,6 +59,54 @@ impl EndPoint {
                     Marker::DoublePoint(color, r2, end_color, r1)
                 }
             },
+        }
+    }
+}
+
+impl Marker {
+    pub fn get_max_radius(&self) -> f32 {
+        match self {
+            Marker::None => 0.0,
+            Marker::SinglePoint(_, r) => *r,
+            Marker::DoublePoint(_, r1, _, r2) => r1.max(*r2),
+        }
+    }
+}
+impl EndPoint {
+    pub fn get_max_radius(&self) -> f32 {
+        match self {
+            EndPoint::Marker(marker) => marker.get_max_radius(),
+            EndPoint::Match(r) => *r,
+            EndPoint::BorderedMatch(r1, _, r2) => r1.max(*r2),
+        }
+    }
+}
+impl Intersections {
+    pub fn get_max_radius(&self) -> f32 {
+        match self {
+            Intersections::Nothing => 0.0,
+            Intersections::UniformPoints(marker) => marker.get_max_radius(),
+            Intersections::EndsAndMiddle(m1, m2, m3) => 
+                m1.get_max_radius().max(m2.get_max_radius()).max(m3.get_max_radius()),
+        }
+    }
+}
+impl Triangle {
+    pub fn get_max_radius(&self) -> f32 {
+        match self {
+            Triangle::None => 0.0,
+            Triangle::Match(r) => *r,
+            Triangle::BorderMatch(r1, _, r2) => r1.max(*r2),
+            Triangle::BorderStartMatch(r1, _, r2) => r1.max(*r2),
+        }
+    }
+}
+impl Lines {
+    pub fn get_max_radius(&self) -> f32 {
+        match self {
+            Lines::Monocolor(_) => 0.0,
+            Lines::Gradient(_) => 0.0,
+            Lines::SegmentColors(_, triangle) => triangle.get_max_radius(),
         }
     }
 }
