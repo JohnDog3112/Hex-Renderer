@@ -1,5 +1,6 @@
 use tiny_skia::Color;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Lines {
     Monocolor(Color),
@@ -13,6 +14,7 @@ pub struct GradientOptions {
     pub segs_per_color: usize,
     pub bent_corners: bool,
 }
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Triangle {
     None,
@@ -21,12 +23,15 @@ pub enum Triangle {
     BorderStartMatch(f32, Color, f32),
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Marker {
     None,
     SinglePoint(Color, f32),
     DoublePoint(Color, f32, Color, f32),
 }
+
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum EndPoint {
     Marker(Marker),
@@ -34,6 +39,7 @@ pub enum EndPoint {
     BorderedMatch(f32, Color, f32),
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Intersections {
     Nothing,

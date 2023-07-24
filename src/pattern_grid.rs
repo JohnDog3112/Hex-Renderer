@@ -1,4 +1,6 @@
-use crate::{coord::Coord, hex_coord::HexCoord};
+use tiny_skia::Pixmap;
+
+use crate::{coord::Coord, hex_coord::HexCoord, pattern_grid_options::{GridDrawOptions, GridOptions}};
 
 use super::Pattern;
 
@@ -102,5 +104,47 @@ impl PatternGrid {
             locations,
             bottom_right: HexCoord(max_x, HexCoord::get_y(current_y + max_y_row)),
         }
+    }
+
+    pub fn draw(&self, file_name: &str, options: GridOptions) {
+
+        let mut intersections = vec![];
+        let mut lines = vec![];
+
+        match options.draw_options {
+            GridDrawOptions::Uniform(inter, lin) => {
+                intersections.push(inter);
+                lines.push(lin);
+            },
+        }
+
+        let mut max_radius = options.line_thickness;
+        
+        for i in 0..lines.len() {
+            max_radius = max_radius.max(intersections[i].get_max_radius()).max(lines[i].get_max_radius());
+        }
+
+
+        let border_size = max_radius * options.scale;
+
+        let offset = HexCoord(border_size, border_size);
+        let map_size = self.bottom_right * options.scale + offset * 2.0;
+        let mut pixmap = Pixmap::new(map_size.0 as u32, map_size.1 as u32).unwrap();
+
+        let lines_index = 0;
+
+        for i in 0..self.patterns.len() {
+            let pattern = &self.patterns[i];
+            let location = HexCoord::from(self.locations[i])*options.scale + offset;
+
+            pattern.draw_pattern(&mut pixmap, location, options.scale, options.line_thickness, &lines[lines_index], &intersections[lines_index]);
+
+            
+        }
+
+
+
+        pixmap.save_png(file_name).unwrap();
+
     }
 }
