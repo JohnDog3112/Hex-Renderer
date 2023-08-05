@@ -42,3 +42,18 @@ impl From<(i32 ,i32)> for Coord {
         Coord(value.0, value.1)
     }
 }
+
+impl Coord {
+    pub fn min_components(self, rhs: Self) -> Self {
+        Coord(
+            self.0.min(rhs.0),
+            self.1.min(rhs.1)
+        )
+    }
+    pub fn max_components(self, rhs: Self) -> Self {
+        Coord(
+            self.0.max(rhs.0),
+            self.1.max(rhs.1)
+        )
+    }
+}

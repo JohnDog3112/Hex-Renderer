@@ -1,6 +1,8 @@
+use std::fs;
+
 use tiny_skia::Pixmap;
 
-use crate::{coord::Coord, hex_coord::HexCoord, pattern_grid_options::{GridDrawOptions, GridOptions}};
+use crate::{pattern_grid_options::{GridDrawOptions, GridOptions}, pattern_utils::{HexCoord, Coord, Angle}};
 
 use super::Pattern;
 
@@ -12,7 +14,7 @@ pub struct PatternGrid {
 }
 
 impl PatternGrid {
-    pub fn generate(patterns: Vec<Pattern>, max_width: i32) -> Self {
+    pub fn generate_grid(patterns: Vec<Pattern>, max_width: i32) -> Self {
         let mut locations = Vec::new();
 
         let max_width = max_width as f32;
@@ -59,7 +61,7 @@ impl PatternGrid {
                 current_x -= max_distance_decrease-1;
             }
 
-            if HexCoord::from(Coord(current_x+pattern.bottom_right.0, max_y_row)).0 > max_width {
+            if HexCoord::from(Coord(current_x+pattern.bottom_right.0, max_y_row)).0 > max_width && index != 0 {
                 current_x = -pattern.top_left.0;
                 current_y += max_y_row + 1;
                 
@@ -106,16 +108,23 @@ impl PatternGrid {
         }
     }
 
-    pub fn draw(&self, file_name: &str, options: GridOptions) {
+    pub fn draw_grid_to_file(&self, file_name: &str, options: GridOptions) {
+        fs::write(file_name, self.draw_grid(options)).unwrap();
+    }
 
-        let mut intersections = vec![];
-        let mut lines = vec![];
+    pub fn draw_grid(&self, options: GridOptions) -> Vec<u8> {
+
+        let intersections;
+        let lines;
 
         match options.draw_options {
             GridDrawOptions::Uniform(inter, lin) => {
-                intersections.push(inter);
-                lines.push(lin);
+                intersections = vec![inter];
+                lines = vec![lin];
             },
+            GridDrawOptions::Changing(variations) => {
+                (intersections, lines) = variations.into_iter().unzip();
+            }
         }
 
         let mut max_radius = options.line_thickness;
@@ -131,20 +140,37 @@ impl PatternGrid {
         let map_size = self.bottom_right * options.scale + offset * 2.0;
         let mut pixmap = Pixmap::new(map_size.0 as u32, map_size.1 as u32).unwrap();
 
-        let lines_index = 0;
+        let mut lines_index = 0;
+
+        let mut increment = false;
+
+        let intro_pattern = vec![Angle::Left, Angle::Left, Angle::Left];
+        let retro_pattern = vec![Angle::Right, Angle::Right, Angle::Right];
 
         for i in 0..self.patterns.len() {
             let pattern = &self.patterns[i];
             let location = HexCoord::from(self.locations[i])*options.scale + offset;
 
+            if pattern.angles == intro_pattern {
+                increment = true;
+            } else if pattern.angles == retro_pattern {
+                if lines_index == 0 {
+                    lines_index = lines.len()-1;
+                } else {
+                    lines_index -= 1;
+                }
+            }
+
             pattern.draw_pattern(&mut pixmap, location, options.scale, options.line_thickness, &lines[lines_index], &intersections[lines_index]);
 
+            if increment {
+                increment = false;
+                lines_index = (lines_index+1)%lines.len();
+            }
             
         }
 
-
-
-        pixmap.save_png(file_name).unwrap();
+        pixmap.encode_png().unwrap()
 
     }
 }

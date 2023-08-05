@@ -1,15 +1,18 @@
 use tiny_skia::Color;
 
-use crate::draw_options::{Intersections, Lines, Marker, EndPoint, GradientOptions, Triangle};
+use crate::draw_options::{Intersections, Lines, Marker, EndPoint, Triangle};
 
+#[derive(Clone)]
 pub struct GridOptions {
     pub line_thickness: f32,
     pub scale: f32,
     pub draw_options: GridDrawOptions,
 }
 #[allow(dead_code)]
+#[derive(Clone)]
 pub enum GridDrawOptions {
-    Uniform(Intersections, Lines)
+    Uniform(Intersections, Lines),
+    Changing(Vec<(Intersections, Lines)>)
 }
 
 #[allow(dead_code)]
@@ -19,7 +22,7 @@ impl GridOptions {
     const DEFAULT_INNER_RADIUS: f32 = 0.1;
     const DEFAULT_OUTER_RADIUS: f32 = 0.14;
 
-    fn generate_unifrom(intersections: Intersections, lines: Lines) -> Self {
+    fn generate_uniform(intersections: Intersections, lines: Lines) -> Self {
         GridOptions {
             line_thickness: Self::DEFUALT_LINE_THICKNESS,
             scale: Self::DEFAULT_SCALE,
@@ -31,7 +34,7 @@ impl GridOptions {
         let intersections = Intersections::UniformPoints(Marker::SinglePoint(Color::WHITE, Self::DEFAULT_INNER_RADIUS));
         let lines = Lines::Monocolor(Color::from_rgba8(108, 25, 140, 255));
 
-        Self::generate_unifrom(intersections, lines)
+        Self::generate_uniform(intersections, lines)
     }
 
     fn default_colors() -> Vec<Color> {
@@ -52,13 +55,9 @@ impl GridOptions {
         let mut colors = vec![];
         Self::default_colors()[0..2].clone_into(&mut colors);
 
-        let lines = Lines::Gradient(GradientOptions {
-            colors: colors,
-            segs_per_color: 15,
-            bent_corners: true,
-        });
+        let lines = Lines::Gradient(colors,15,true);
 
-        Self::generate_unifrom(intersections, lines)
+        Self::generate_uniform(intersections, lines)
     }
 
     pub fn multi_gradient() -> Self {
@@ -68,13 +67,9 @@ impl GridOptions {
             Marker::SinglePoint(Color::WHITE, Self::DEFAULT_INNER_RADIUS)
         );
 
-        let lines = Lines::Gradient(GradientOptions {
-            colors: Self::default_colors(),
-            segs_per_color: 15,
-            bent_corners: true,
-        });
+        let lines = Lines::Gradient(Self::default_colors(), 15, true);
 
-        Self::generate_unifrom(intersections, lines)
+        Self::generate_uniform(intersections, lines)
     }
 
     pub fn segments() -> Self {
@@ -89,7 +84,7 @@ impl GridOptions {
             Triangle::BorderStartMatch(0.16, Color::WHITE, 0.24)
         );
 
-        Self::generate_unifrom(intersections, lines)
+        Self::generate_uniform(intersections, lines)
     }
 
     
