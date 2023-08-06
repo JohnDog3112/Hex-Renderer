@@ -8,8 +8,10 @@ pub enum Angle {
     Left = 5,
 }
 
+pub struct AngleParseError(pub char);
+
 impl TryFrom<char> for Angle {
-    type Error = ();
+    type Error = AngleParseError;
 
     fn try_from(value: char) -> Result<Self, Self::Error> {
         match value {
@@ -19,7 +21,7 @@ impl TryFrom<char> for Angle {
             's' => Ok(Angle::Back),
             'a' => Ok(Angle::BackLeft),
             'q' => Ok(Angle::Left),
-            _ => Err(()),
+            _ => Err(AngleParseError(value)),
         }
     }
 }

@@ -2,7 +2,9 @@ use tiny_skia::{Color, LineCap, LineJoin, Pixmap, Stroke};
 
 use crate::{
     options::{Intersections, Lines},
-    pattern_utils::{Angle, Coord, Direction, DynamicList, HexCoord},
+    pattern_utils::{
+        Angle, AngleParseError, Coord, Direction, DirectionParseError, DynamicList, HexCoord,
+    },
 };
 
 use super::{
@@ -165,14 +167,21 @@ impl Pattern {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum PatternParseError {
+    InvalidParts(String),
+    HangingHexPattern(String),
+    InvalidStartDirection { input: String, direction: String },
+    InvalidAngle { input: String, angle: char },
+}
 impl TryFrom<&str> for Pattern {
-    type Error = ();
+    type Error = PatternParseError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let mut parts: Vec<&str> = value.split(' ').collect();
+        let mut parts: Vec<&str> = value.trim().split(' ').collect();
 
         if parts.len() != 2 {
-            return Err(());
+            return Err(Self::Error::InvalidParts(value.to_string()));
         }
 
         if parts[0].to_lowercase().starts_with("hexpattern(") {
@@ -180,16 +189,29 @@ impl TryFrom<&str> for Pattern {
                 parts[0] = &parts[0]["hexpattern(".len()..];
                 parts[1] = &parts[1][..parts[1].len() - 1];
             } else {
-                return Err(());
+                return Err(Self::Error::HangingHexPattern(value.to_string()));
             }
         }
 
-        let direction: Direction = parts[0].try_into()?;
+        let direction: Direction =
+            parts[0]
+                .try_into()
+                .map_err(|err| PatternParseError::InvalidStartDirection {
+                    input: value.to_string(),
+                    direction: match err {
+                        DirectionParseError::InvalidNumber(_) => unreachable!(),
+                        DirectionParseError::InvalidStr(str) => str,
+                    },
+                })?;
 
         let angles: Vec<Angle> = parts[1]
             .chars()
             .map(|a| Angle::try_from(a))
-            .collect::<Result<Vec<Angle>, _>>()?;
+            .collect::<Result<Vec<Angle>, AngleParseError>>()
+            .map_err(|err| PatternParseError::InvalidAngle {
+                input: value.to_string(),
+                angle: err.0,
+            })?;
 
         return Ok(Pattern::new(direction, angles));
     }
