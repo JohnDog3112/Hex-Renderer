@@ -1,5 +1,3 @@
-use crate::pattern::PatternParseError;
-
 use super::Angle;
 use std::ops::Add;
 

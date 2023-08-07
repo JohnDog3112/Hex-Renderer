@@ -3,7 +3,7 @@ use std::fs;
 use tiny_skia::Pixmap;
 
 use crate::{
-    options::{GridOptions, GridPatternOptions, Intersections, Lines},
+    options::{GridOptions, GridPatternOptions},
     pattern::Pattern,
     pattern_utils::{Angle, Coord, HexCoord},
 };
@@ -13,6 +13,7 @@ pub struct HexGrid {
     pub patterns: Vec<Pattern>,
     pub locations: Vec<Coord>,
     pub bottom_right: HexCoord,
+    pub offset_left: bool,
 }
 
 impl HexGrid {
@@ -27,6 +28,8 @@ impl HexGrid {
 
         let mut max_y_row = 0;
         let mut max_x = 0.0;
+
+        let mut offset_left = true;
 
         for index in 0..patterns.len() {
             let pattern = &patterns[index];
@@ -43,6 +46,10 @@ impl HexGrid {
                     }
                 }
                 current_x_offset = -left_most as i32;
+
+                if left_most - left_most.floor() < 0.45 {
+                    offset_left = false;
+                }
             } else {
                 let prev_pattern = &patterns[index - 1];
                 let mut max_distance_decrease = i32::MAX;
@@ -81,6 +88,11 @@ impl HexGrid {
                     }
                 }
                 current_x_offset = -left_most as i32;
+
+                if left_most - left_most.floor() < 0.45 {
+                    offset_left = false;
+                }
+
                 max_y_row = 0;
 
                 for point in &patterns[index - 1].right_perimiter {
@@ -113,6 +125,7 @@ impl HexGrid {
             patterns,
             locations,
             bottom_right: HexCoord(max_x, HexCoord::get_y(current_y + max_y_row)),
+            offset_left,
         }
     }
 
@@ -146,9 +159,13 @@ impl HexGrid {
 
         let offset = HexCoord(border_size, border_size);
         let map_size = self.bottom_right * scale + offset * 2.0;
-        println!("map_size: {:?}", map_size);
-        let mut pixmap = Pixmap::new(map_size.0 as u32, map_size.1 as u32).unwrap();
-        println!("here");
+
+        let mut left_offset = 0.0;
+        if self.offset_left {
+            left_offset = 0.5;
+        }
+        let mut pixmap =
+            Pixmap::new((map_size.0 - left_offset * scale) as u32, map_size.1 as u32).unwrap();
 
         let mut lines_index = 0;
 
@@ -158,9 +175,9 @@ impl HexGrid {
         let retro_pattern = vec![Angle::Right, Angle::Right, Angle::Right];
 
         for i in 0..self.patterns.len() {
-            println!("i: {i}");
             let pattern = &self.patterns[i];
-            let location = HexCoord::from(self.locations[i]) * scale + offset;
+            let location =
+                (HexCoord::from(self.locations[i]) - HexCoord(left_offset, 0.0)) * scale + offset;
 
             if pattern.angles == intro_pattern {
                 increment = true;

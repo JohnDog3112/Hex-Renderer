@@ -22,19 +22,17 @@ fn main() {
     //let patterns_str = "NORTH_WEST wawqwawwwewwwewwwawqwawwwewwwewdeaweeadedaeewaawwww";
     //let patterns_str = "SOUTH_EAST wqwwwqwwwdwewdwqqdaeeeeeaddwweaqaawewawqwawwwewwwew";
 
-    //let patterns_str = "NORTH_EAST qaqqqqwwawwqqeaddwwddas";
+    let patterns_str = "NORTH_EAST qaqqqqwwawwqqeaddwwddas";
 
-    let patterns_str = "ne ".to_string() + &(0..2000).map(|_| 'w').collect::<String>();
-    println!("patterns_str");
+    //let patterns_str = "ne ".to_string() + &(0..2000).map(|_| 'w').collect::<String>();
+
     let patterns: Vec<Pattern> = patterns_str
         .split(", ")
         .filter_map(|str| Pattern::try_from(str).map_or(None, |pattern| Some(pattern)))
         .collect();
 
     let grid = hex_grid::HexGrid::generate_grid(patterns.clone(), 30);
-    println!("generated");
-    println!("grid: {:?}", grid.bottom_right);
 
-    let scale = 1.0;
+    let scale = 50.0;
     grid.draw_grid_to_file("image.png", scale, &defaults::SEGMENT);
 }
