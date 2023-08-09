@@ -1,4 +1,4 @@
-use tiny_skia::{Color, Paint, Path, PathBuilder, Pixmap, Stroke, Transform};
+use tiny_skia::{Color, Paint, Path, PathBuilder, Pixmap, Shader, Stroke, Transform};
 
 use super::HexCoord;
 
@@ -49,6 +49,12 @@ impl<'a> LineDrawer<'a> {
     pub fn set_color(&mut self, color: Color) {
         self.new_path(self.prev_point, self.stroke.clone(), self.paint.clone());
         self.paint.set_color(color);
+    }
+
+    pub fn set_shader(&mut self, shader: Shader<'a>) {
+        let mut paint = self.paint.clone();
+        paint.shader = shader;
+        self.new_path(self.prev_point, self.stroke.clone(), paint);
     }
     pub fn set_width(&mut self, width: f32) {
         self.new_path(self.prev_point, self.stroke.clone(), self.paint.clone());

@@ -1,26 +1,26 @@
-use tiny_skia::{Pixmap, Stroke, Color, PathBuilder, Paint, Transform};
+use tiny_skia::{Color, Paint, Pixmap, Stroke};
 
-use crate::pattern_utils::HexCoord;
+use crate::pattern_utils::{HexCoord, LineDrawer};
 
 use super::Pattern;
 
-pub fn draw_monocolor_lines(pattern: &Pattern, pixmap: &mut Pixmap, stroke: &Stroke,
-    origin: HexCoord, scale: f32, 
-    color: Color
+pub fn draw_monocolor_lines(
+    pattern: &Pattern,
+    pixmap: &mut Pixmap,
+    stroke: &Stroke,
+    origin: HexCoord,
+    scale: f32,
+    color: Color,
 ) {
-    let mut pb = PathBuilder::new();
+    let mut paint = Paint::default();
+    paint.set_color(color);
 
-    pb.move_to(origin.0, origin.1);
+    let mut line_drawer = LineDrawer::new(origin, stroke.clone(), paint);
 
     for line in &pattern.path {
         let current = HexCoord::from(*line) * scale + origin;
-        
-        pb.line_to(current.0, current.1);
+        line_drawer.line_to(current);
     }
 
-    let path = pb.finish().unwrap();
-    
-    let mut paint = Paint::default();
-    paint.set_color(color);
-    pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
+    line_drawer.draw_all(pixmap);
 }

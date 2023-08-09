@@ -24,7 +24,7 @@ fn main() {
 
     //let patterns_str = "NORTH_EAST qaqqqqwwawwqqeaddwwddas";
 
-    let patterns_str = "NORTH_EAST qeqwqwqwqwqeqaeqeaqeqaeqaqdededwaqdedsssssssssssdess";
+    //let patterns_str = "NORTH_EAST qeqwqwqwqwqeqaeqeaqeqaeqaqdededwaqdedsssssssssssdess";
     let patterns_str = "NORTH_EAST qeqwqwqwqwqeqaeqeaqeqaeqaqded";
 
     //let patterns_str = "EAST wwwsdsdsdsdsds";
@@ -92,5 +92,5 @@ fn main() {
         ),
     };*/
 
-    grid.draw_grid_to_file("text.png", scale, &defaults::GRADIENT);
+    grid.draw_grid_to_file("text.png", scale, &defaults::MONOCOLOR);
 }
