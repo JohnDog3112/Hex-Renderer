@@ -1,4 +1,4 @@
-use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Transform};
+use tiny_skia::{Color, FillRule, Paint, PathBuilder, Pixmap, Transform};
 
 use crate::{
     options::Point,
@@ -44,4 +44,11 @@ pub fn draw_points(
             }
         }
     }
+}
+
+pub fn draw_point(pixmap: &mut Pixmap, center: HexCoord, radius: f32, color: Color) {
+    let path = PathBuilder::from_circle(center.0, center.1, radius).unwrap();
+    let mut paint = Paint::default();
+    paint.set_color(color);
+    pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
 }

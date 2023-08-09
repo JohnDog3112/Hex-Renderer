@@ -1,5 +1,5 @@
-use std::ops::Add;
 use super::Direction;
+use std::ops::Add;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Coord(pub i32, pub i32);
@@ -37,23 +37,25 @@ impl Add for Coord {
     }
 }
 
-impl From<(i32 ,i32)> for Coord {
-    fn from(value: (i32 ,i32)) -> Self {
+impl From<(i32, i32)> for Coord {
+    fn from(value: (i32, i32)) -> Self {
         Coord(value.0, value.1)
     }
 }
 
 impl Coord {
     pub fn min_components(self, rhs: Self) -> Self {
-        Coord(
-            self.0.min(rhs.0),
-            self.1.min(rhs.1)
-        )
+        Coord(self.0.min(rhs.0), self.1.min(rhs.1))
     }
     pub fn max_components(self, rhs: Self) -> Self {
-        Coord(
-            self.0.max(rhs.0),
-            self.1.max(rhs.1)
-        )
+        Coord(self.0.max(rhs.0), self.1.max(rhs.1))
+    }
+
+    pub fn order_by_x(self, rhs: Self) -> (Self, Self) {
+        if self.0 < rhs.0 || (self.0 == rhs.0 && self.1 < rhs.1) {
+            (self, rhs)
+        } else {
+            (rhs, self)
+        }
     }
 }

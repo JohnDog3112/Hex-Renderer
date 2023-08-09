@@ -1,9 +1,12 @@
+use std::collections::{HashMap, HashSet};
+
 use tiny_skia::{Color, LineCap, LineJoin, Pixmap, Stroke};
 
 use crate::{
-    options::{Intersections, Lines},
+    options::{Intersections, Lines, Marker, Point},
     pattern_utils::{
-        Angle, AngleParseError, Coord, Direction, DirectionParseError, DynamicList, HexCoord,
+        Angle, AngleParseError, ConnectionPoint, Coord, Direction, DirectionParseError,
+        DynamicList, HexCoord,
     },
 };
 
@@ -18,18 +21,26 @@ pub struct Pattern {
     pub top_left: Coord,
     pub bottom_right: Coord,
 
+    top_left_bound: HexCoord,
+    bottom_right_bound: HexCoord,
+
     pub left_perimiter: Vec<Coord>,
     pub right_perimiter: Vec<Coord>,
 
     pub points: Vec<Coord>,
     pub angles: Vec<Angle>,
+
+    pub collisions: HashMap<ConnectionPoint, i32>,
 }
 
 impl Pattern {
     pub fn new(rotation: Direction, links: Vec<Angle>) -> Self {
         let mut path = vec![Coord(0, 0), Coord(0, 0) + rotation];
         let mut top_left = path[0].min_components(path[1]);
-        let mut bottom_right = path[1].max_components(path[1]);
+        let mut bottom_right = path[0].max_components(path[1]);
+
+        let mut top_left_bound = HexCoord::from(path[0]).min_components(path[1].into());
+        let mut bottom_right_bound = HexCoord::from(path[0]).max_components(path[1].into());
 
         let mut rotation = rotation;
 
@@ -39,15 +50,35 @@ impl Pattern {
         Self::add_to_perimiter(&mut left_perimiter, &mut right_perimiter, path[0]);
         Self::add_to_perimiter(&mut left_perimiter, &mut right_perimiter, path[1]);
 
+        let mut collisions = HashMap::new();
+        let mut connections = HashSet::new();
+
+        connections.insert(ConnectionPoint::new(path[0], path[1]));
+
         for link in &links {
             rotation = rotation + *link;
 
-            let next_point = *path.last().unwrap() + rotation;
+            let last_point = *path.last().unwrap();
+            let next_point = last_point + rotation;
 
             top_left = top_left.min_components(next_point);
             bottom_right = bottom_right.max_components(next_point);
+
+            top_left_bound = top_left_bound.min_components(next_point.into());
+            bottom_right_bound = bottom_right_bound.max_components(next_point.into());
+
             Self::add_to_perimiter(&mut left_perimiter, &mut right_perimiter, next_point);
             path.push(next_point);
+
+            let connection_point = ConnectionPoint::new(next_point, last_point);
+
+            if let Some(collisions) = collisions.get_mut(&connection_point) {
+                *collisions += 1;
+            } else if connections.contains(&connection_point) {
+                collisions.insert(connection_point, 1);
+            } else {
+                connections.insert(connection_point);
+            }
         }
 
         let mut points = path.clone();
@@ -56,10 +87,13 @@ impl Pattern {
             path,
             top_left,
             bottom_right,
+            top_left_bound,
+            bottom_right_bound,
             left_perimiter: left_perimiter.to_vector(),
             right_perimiter: right_perimiter.to_vector(),
             points,
             angles: links,
+            collisions,
         }
     }
     fn add_to_perimiter(
@@ -163,6 +197,35 @@ impl Pattern {
 
                 draw_points(&middle_points, pixmap, origin, scale, &middle);
             }
+        }
+
+        let center = (self.bottom_right_bound + self.top_left_bound) / 2.0;
+        let y_factor = 0.866025403784;
+
+        let y_coord = (center.1 / y_factor).round() as i32;
+        let x_coord = (center.0 - 0.5 * y_coord as f32) as i32;
+
+        println!(
+            "{:?}, {:?}, {:?}, {:?}, {:?}, {:?}",
+            self.bottom_right,
+            self.top_left,
+            center,
+            x_coord,
+            y_coord,
+            HexCoord::from(Coord(x_coord, y_coord))
+        );
+        let coord = Coord(x_coord, y_coord);
+        if !self.points.contains(&coord) {
+            draw_points(
+                &vec![Coord(x_coord, y_coord)],
+                pixmap,
+                origin,
+                scale,
+                &Point::Single(Marker {
+                    color: Color::WHITE,
+                    radius: 0.07,
+                }),
+            );
         }
     }
 }

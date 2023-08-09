@@ -19,6 +19,40 @@ impl Add<Angle> for Direction {
     }
 }
 
+impl TryFrom<(i32, i32)> for Direction {
+    type Error = ();
+
+    fn try_from(value: (i32, i32)) -> Result<Self, Self::Error> {
+        match value {
+            (1, 0) => Ok(Self::East),
+            (-1, 0) => Ok(Self::West),
+
+            (1, -1) => Ok(Direction::NorthEast),
+            (-1, 1) => Ok(Direction::SouthWest),
+
+            (0, 1) => Ok(Direction::SouthEast),
+            (0, -1) => Ok(Direction::NorthWest),
+
+            _ => Err(()),
+        }
+    }
+}
+
+impl Direction {
+    #[allow(dead_code)]
+    pub fn get_reverse(self) -> Self {
+        match self {
+            Self::East => Self::West,
+            Self::West => Self::East,
+
+            Self::NorthEast => Self::SouthWest,
+            Self::SouthWest => Self::NorthEast,
+
+            Self::NorthWest => Self::SouthEast,
+            Self::SouthEast => Self::NorthWest,
+        }
+    }
+}
 #[derive(Debug)]
 pub enum DirectionParseError {
     InvalidNumber(u8),

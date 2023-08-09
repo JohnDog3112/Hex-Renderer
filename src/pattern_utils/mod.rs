@@ -12,3 +12,9 @@ pub use dynamic_list::DynamicList;
 
 mod hex_coord;
 pub use hex_coord::HexCoord;
+
+mod connection_point;
+pub use connection_point::ConnectionPoint;
+
+mod line_drawer;
+pub use line_drawer::LineDrawer;

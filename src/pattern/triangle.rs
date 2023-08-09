@@ -36,18 +36,20 @@ fn generate_triangle_path(location: HexCoord, next: HexCoord, radius: f32) -> Pa
 
     let point1 = location + dir / magnitude * radius;
     let point2 = rotate_point(location, point1, (-120.0f32).to_radians());
-    let point3 = rotate_point(location, point1, (120.0f32).to_radians());
+    //let point3 = location - dir / magnitude * radius / 6.0;
+    let point4 = rotate_point(location, point1, (120.0f32).to_radians());
 
     let mut path = PathBuilder::new();
     path.move_to(point1.0, point1.1);
     path.line_to(point2.0, point2.1);
-    path.line_to(point3.0, point3.1);
+    //path.line_to(point3.0, point3.1);
+    path.line_to(point4.0, point4.1);
     path.line_to(point1.0, point1.1);
 
     path.finish().unwrap()
 }
 
-fn rotate_point(center: HexCoord, point: HexCoord, angle: f32) -> HexCoord {
+pub fn rotate_point(center: HexCoord, point: HexCoord, angle: f32) -> HexCoord {
     let c = angle.cos();
     let s = angle.sin();
 

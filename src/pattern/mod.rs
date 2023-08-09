@@ -1,9 +1,10 @@
 mod pattern;
 pub use pattern::*;
 
-mod triangle;
 mod point;
+mod triangle;
 
-mod draw_monocolor;
 mod draw_gradient;
+mod draw_monocolor;
 mod draw_segments;
+mod text;

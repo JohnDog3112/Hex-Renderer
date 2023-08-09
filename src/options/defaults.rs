@@ -5,6 +5,7 @@ use crate::options::{palettes, GridPatternOptions, Marker, Triangle};
 
 use super::{EndPoint, GridOptions, Intersections, Lines, Point};
 
+#[allow(dead_code)]
 pub mod constants {
     pub const LINE_THICKNESS: f32 = 0.12;
     pub const SCALE: f32 = 50.0;
