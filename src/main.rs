@@ -1,13 +1,9 @@
 mod pattern_utils;
 
-use options::{defaults, palettes, GridOptions, GridPatternOptions, Intersections, Lines};
+use options::{defaults, palettes, GridOptions, GridPatternOptions, Lines};
 
 mod pattern;
 use pattern::Pattern;
-
-use pattern_utils::{Angle, Direction};
-use pest::Parser;
-use pest_derive::Parser;
 
 mod hex_grid;
 
@@ -28,7 +24,7 @@ fn main() {
 
     //let patterns_str = "NORTH_EAST qaqqqqwwawwqqeaddwwddas";
 
-    let patterns_str = "NORTH_EAST qeqwqwqwqwqeqaeqeaqeqaeqaqdededwaqdedsssssssssssdess";
+    let patterns_str = "NORTH_EAST qeqwqwqwqwqeqssssssaeqeaqeqaeqaqdededwaqdedsssssdssess";
     //let patterns_str = "NORTH_EAST qeqwqwqwqwqeqaeqeaqeqaeqaqded";
 
     //let patterns_str = "EAST wwwsdsdsdsdsds";
@@ -53,10 +49,11 @@ fn main() {
         line_thickness: defaults::constants::LINE_THICKNESS,
         pattern_options: GridPatternOptions::Uniform(
             defaults::components::SEGMENT_INTERSECTION.clone(),
-            Lines::SegmentColors(
-                palettes::TAB10.to_vec(),
-                defaults::components::TRIANGLE.clone(),
-            ),
+            Lines::SegmentColors {
+                colors: palettes::TAB10.to_vec(),
+                triangles: defaults::components::TRIANGLE.clone(),
+                collisions: defaults::components::COLLISIONS.clone(),
+            },
         ),
     };
     /*let options = GridOptions {

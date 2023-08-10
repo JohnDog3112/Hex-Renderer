@@ -9,7 +9,11 @@ pub enum Lines {
         segments_per_color: usize,
         bent: bool,
     },
-    SegmentColors(Vec<Color>, Triangle),
+    SegmentColors {
+        colors: Vec<Color>,
+        triangles: Triangle,
+        collisions: CollisionOption,
+    },
 }
 
 #[allow(dead_code)]
@@ -19,6 +23,26 @@ pub enum Triangle {
     Match { radius: f32 },
     BorderMatch { match_radius: f32, border: Marker },
     BorderStartMatch { match_radius: f32, border: Marker },
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy)]
+pub enum CollisionOption {
+    Dashes(Color),
+    MatchedDashes,
+    ParallelLines,
+    OverloadedParallel {
+        max_line: usize,
+        overload: OverloadOptions,
+    },
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy)]
+pub enum OverloadOptions {
+    Dashes(Color),
+    LabeledDashes { color: Color, label: Marker },
+    MatchedDashes,
 }
 
 #[allow(dead_code)]
@@ -227,7 +251,11 @@ impl Lines {
                 segments_per_color: _,
                 bent: _,
             } => 0.0,
-            Lines::SegmentColors(_, triangle) => triangle.get_max_radius(),
+            Lines::SegmentColors {
+                colors: _,
+                triangles: arrows,
+                collisions: _,
+            } => arrows.get_max_radius(),
         }
     }
 }

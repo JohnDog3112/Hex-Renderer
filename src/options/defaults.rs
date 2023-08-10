@@ -18,9 +18,12 @@ pub mod constants {
 
     pub const TRIANGLE_INNER_RADIUS: f32 = 0.16;
     pub const TRIANGLE_OUTER_RADIUS: f32 = 0.25;
+    pub const COLLISION_LINE_COUNT: usize = 4;
 }
 use constants::*;
 pub mod components {
+    use crate::options::{CollisionOption, OverloadOptions};
+
     use super::*;
 
     lazy_static! {
@@ -73,8 +76,24 @@ pub mod components {
             match_radius: TRIANGLE_INNER_RADIUS,
             border: *TRIANGLE_MARKER
         };
-        pub static ref SEGMENT_LINE: Lines =
-            Lines::SegmentColors(palettes::DEFAULT.to_vec(), *TRIANGLE);
+        pub static ref LABEL: Marker = Marker {
+            color: Color::WHITE,
+            radius: 0.1
+        };
+        pub static ref COLLISION_COLOR: Color = Color::from_rgba8(255, 0, 0, 255);
+        pub static ref COLLISION_OVERLOAD: OverloadOptions = OverloadOptions::LabeledDashes {
+            color: *COLLISION_COLOR,
+            label: *LABEL,
+        };
+        pub static ref COLLISIONS: CollisionOption = CollisionOption::OverloadedParallel {
+            max_line: COLLISION_LINE_COUNT,
+            overload: *COLLISION_OVERLOAD
+        };
+        pub static ref SEGMENT_LINE: Lines = Lines::SegmentColors {
+            colors: palettes::DEFAULT.to_vec(),
+            triangles: *TRIANGLE,
+            collisions: *COLLISIONS
+        };
     }
 }
 use components::*;
@@ -122,7 +141,8 @@ mod grids {
             GridOptions::generate(GridPatternOptions::gen_changing_segment(
                 *SEGMENT_INTERSECTION,
                 palettes::ALL.to_vec(),
-                *TRIANGLE
+                *TRIANGLE,
+                *COLLISIONS
             ));
     }
 }

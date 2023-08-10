@@ -42,7 +42,7 @@ pub fn draw_text(pixmap: &mut Pixmap, str: &str, mut color: Color, center: HexCo
                     let x = x as usize;
                     let y = y as usize;
                     color.set_alpha(v);
-                    pixels[(x + y * width as usize)] = color.premultiply().to_color_u8();
+                    pixels[x + y * width as usize] = color.premultiply().to_color_u8();
                 }
             })
         }

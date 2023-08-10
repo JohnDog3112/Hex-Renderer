@@ -164,10 +164,24 @@ impl Pattern {
                     );
                 }
             }
-            Lines::SegmentColors(colors, triangle) => {
+            Lines::SegmentColors {
+                colors,
+                triangles: arrows,
+                collisions,
+            } => {
                 end_colors = (
                     colors[0],
-                    draw_segment_lines(&self, pixmap, &stroke, origin, scale, colors, triangle),
+                    draw_segment_lines(
+                        &self,
+                        pixmap,
+                        &stroke,
+                        origin,
+                        scale,
+                        colors,
+                        arrows,
+                        point_options.get_max_radius(),
+                        collisions,
+                    ),
                 );
             }
         }

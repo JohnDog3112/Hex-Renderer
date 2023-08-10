@@ -2,7 +2,7 @@ use tiny_skia::Color;
 
 use crate::options::{Intersections, Lines, Triangle};
 
-use super::defaults::constants;
+use super::{defaults::constants, CollisionOption};
 
 #[derive(Clone)]
 pub struct GridOptions {
@@ -62,13 +62,18 @@ impl GridPatternOptions {
     pub fn gen_changing_segment(
         intersection: Intersections,
         colors: Vec<Vec<Color>>,
-        triangle: Triangle,
+        triangles: Triangle,
+        collisions: CollisionOption,
     ) -> Self {
         Self::generate_changing(
             intersection,
             colors
                 .into_iter()
-                .map(|colors| Lines::SegmentColors(colors, triangle))
+                .map(|colors| Lines::SegmentColors {
+                    colors,
+                    triangles,
+                    collisions,
+                })
                 .collect(),
         )
     }

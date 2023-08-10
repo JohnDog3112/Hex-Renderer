@@ -5,7 +5,7 @@ use tiny_skia::{
 };
 
 use crate::{
-    options::Triangle,
+    options::{CollisionOption, Marker, Triangle},
     pattern::text::draw_text,
     pattern_utils::{ConnectionPoint, Coord, HexCoord, LineDrawer},
 };
@@ -24,7 +24,10 @@ pub fn draw_segment_lines(
     scale: f32,
     colors: &Vec<Color>,
     triangles: &Triangle,
+    point_radius: f32,
+    collisions: &CollisionOption,
 ) -> Color {
+    let point_radius = stroke.width.max(scale * point_radius);
     let mut visited_points: HashMap<Coord, Vec<usize>> = HashMap::new();
 
     let mut travelled_collisions: HashMap<ConnectionPoint, Vec<bool>> = HashMap::new();
@@ -33,11 +36,7 @@ pub fn draw_segment_lines(
 
     let mut triangle_queue: Vec<(crate::options::Point, HexCoord, HexCoord, f32)> = Vec::new();
 
-    let bad_color = Color::from_rgba8(255, 0, 0, 255);
-
     let mut last_collision_lane = None;
-
-    let too_many_lines = 4;
 
     let mut paint = Paint::default();
     paint.set_color(colors[0]);
@@ -46,8 +45,39 @@ pub fn draw_segment_lines(
     let mut prev_loc = origin;
     let mut prev_point = Coord(0, 0);
 
-    let full_red = false;
-    let stripes = true;
+    let (full_dash, stripes, too_many_lines, bad_color, label) = {
+        let mut full_dash = false;
+        let mut stripes = false;
+        let mut too_many_lines = i32::MAX;
+        let mut bad_color = Color::WHITE;
+        let mut label = None;
+        match collisions {
+            CollisionOption::Dashes(color) => {
+                full_dash = true;
+                bad_color = *color;
+            }
+            CollisionOption::MatchedDashes => {
+                stripes = true;
+                too_many_lines = 1;
+            }
+            CollisionOption::ParallelLines => (),
+            CollisionOption::OverloadedParallel { max_line, overload } => {
+                too_many_lines = *max_line.max(&1) as i32;
+                match overload {
+                    crate::options::OverloadOptions::Dashes(color) => bad_color = *color,
+                    crate::options::OverloadOptions::LabeledDashes {
+                        color,
+                        label: marker,
+                    } => {
+                        bad_color = *color;
+                        label = Some(marker);
+                    }
+                    crate::options::OverloadOptions::MatchedDashes => stripes = true,
+                }
+            }
+        }
+        (full_dash, stripes, too_many_lines, bad_color, label)
+    };
 
     let mut collision_stroke = stroke.clone();
     collision_stroke.dash = StrokeDash::new(vec![scale / 18.0, scale / 16.0], 0.0);
@@ -56,7 +86,7 @@ pub fn draw_segment_lines(
 
     let mut ended_on_collision = false;
 
-    let mut visited: HashMap<ConnectionPoint, i32> = HashMap::new();
+    let mut visited: HashMap<ConnectionPoint, (i32, Coord)> = HashMap::new();
 
     for i in 0..pattern.path.len() {
         let point = &pattern.path[i];
@@ -78,9 +108,11 @@ pub fn draw_segment_lines(
 
         let collisions = pattern.collisions.get(&connection_point).unwrap_or(&-1) + 1;
 
-        let visited_count = visited.get(&connection_point).unwrap_or(&0);
+        let (visited_count, collision_start) = *visited
+            .get(&connection_point)
+            .unwrap_or(&(0, point.clone()));
 
-        let (start, end, triangle_scale) = if collisions == 0 || full_red {
+        let (start, end, triangle_scale) = if collisions == 0 || full_dash {
             last_collision_lane = None;
             (prev_loc, loc, 1.0)
         } else {
@@ -106,8 +138,8 @@ pub fn draw_segment_lines(
             (start, end, line_width / stroke.width)
         };
 
-        let not_draw_red = full_red && *visited_count > 0;
-        let not_draw_lines = *visited_count >= too_many_lines;
+        let not_draw_red = full_dash && visited_count > 0;
+        let not_draw_lines = visited_count >= too_many_lines;
         let not_draw_stripes = stripes && collisions >= too_many_lines;
         let draw = !not_draw_red && !not_draw_lines && !not_draw_stripes;
 
@@ -134,12 +166,12 @@ pub fn draw_segment_lines(
         }
 
         if stripes && collisions >= too_many_lines {
-            let segment_length = (scale - stroke.width * 1.5) / collisions as f32 / 1.5;
-            let start_offset = segment_length * *visited_count as f32 * 1.5 + stroke.width / 1.25;
+            let segment_length = (scale - point_radius * 2.0) / (collisions as f32 + 1.0) / 2.0;
+            let start_offset = segment_length * (visited_count as f32 + 1.0) * 2.0 + point_radius;
             let end_offset = start_offset + segment_length;
 
             let (mut start, mut end) = (prev_loc, loc);
-            if point.0 < prev_point.0 || (point.0 == prev_point.0 && point.1 < prev_point.1) {
+            if collision_start == prev_point {
                 (start, end) = (loc, prev_loc);
             }
             let unit_vec = (end - start).unit_vec();
@@ -152,18 +184,20 @@ pub fn draw_segment_lines(
             stroke.line_join = LineJoin::Miter;
 
             drawer.set_stroke(stroke);
-            if visited_colors.contains(&cur_color) {
-                //let middle = (end_seg - start_seg) / 2.0 + start_seg;
-                //drawer.line_to(middle);
-                cur_color = get_next_color(cur_color, visited_colors, colors.len());
 
-                //drawer.set_color(colors[cur_color]);
+            if visited_count == 0 {
+                let start_set = start + unit_vec * (point_radius + segment_length);
+                drawer.move_to(start);
+                drawer.line_to(start_set);
             }
-            drawer.set_color(colors[cur_color]);
+            if visited_colors.contains(&cur_color) {
+                cur_color = get_next_color(cur_color, visited_colors, colors.len());
+            }
             drawer.move_to(start_seg);
+            drawer.set_color(colors[cur_color]);
 
             drawer.line_to(end_seg);
-        } else if (full_red && collisions > 0 || collisions >= too_many_lines)
+        } else if (full_dash && collisions > 0 || collisions >= too_many_lines)
             && !visited.contains_key(&connection_point)
         {
             drawer.set_stroke(collision_stroke.clone());
@@ -173,21 +207,29 @@ pub fn draw_segment_lines(
             drawer.priority_finish();
             drawer.set_color(colors[cur_color]);
 
-            if collisions > too_many_lines && !full_red {
-                draw_label(pixmap, prev_loc, loc, stroke, scale, collisions);
+            if collisions >= too_many_lines && !full_dash && label.is_some() {
+                draw_label(
+                    pixmap,
+                    label.unwrap(),
+                    prev_loc,
+                    loc,
+                    stroke,
+                    scale,
+                    collisions,
+                );
             }
         }
 
         if collisions != 0 {
-            if full_red {
+            if full_dash {
                 ended_on_collision = true;
             }
             drawer.move_to(loc);
             drawer.set_stroke(stroke.clone());
-            if let Some(count) = visited.get_mut(&connection_point) {
+            if let Some((count, _)) = visited.get_mut(&connection_point) {
                 *count += 1;
             } else {
-                visited.insert(connection_point, 1);
+                visited.insert(connection_point, (1, collision_start));
             }
         }
 
@@ -299,13 +341,14 @@ fn calculate_start_end(
 
 fn draw_label(
     pixmap: &mut Pixmap,
+    label: &Marker,
     prev_loc: HexCoord,
     loc: HexCoord,
     stroke: &Stroke,
     scale: f32,
     collisions: i32,
 ) {
-    let radius = 10.0 * scale / 100.0;
+    let radius = label.radius * scale;
 
     let offset = (loc - prev_loc).unit_vec() * (stroke.width / 2.0 + radius);
     let line_offset = (loc - prev_loc).unit_vec() * stroke.width / 2.0;
@@ -316,7 +359,7 @@ fn draw_label(
     let line_point = rotate_point(middle, middle + line_offset, -90f32.to_radians());
 
     let mut paint = Paint::default();
-    paint.set_color(Color::WHITE);
+    paint.set_color(label.color);
 
     let mut stroke = Stroke::default();
     stroke.width = radius * 2.0;
@@ -329,7 +372,7 @@ fn draw_label(
 
     pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
 
-    draw_point(pixmap, point, radius, Color::WHITE);
+    draw_point(pixmap, point, radius, label.color);
     draw_text(
         pixmap,
         &format!("{collisions}"),
