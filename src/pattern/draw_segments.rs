@@ -152,7 +152,6 @@ pub fn draw_segment_lines(
             stroke.line_join = LineJoin::Miter;
 
             drawer.set_stroke(stroke);
-
             if visited_colors.contains(&cur_color) {
                 //let middle = (end_seg - start_seg) / 2.0 + start_seg;
                 //drawer.line_to(middle);
@@ -162,6 +161,7 @@ pub fn draw_segment_lines(
             }
             drawer.set_color(colors[cur_color]);
             drawer.move_to(start_seg);
+
             drawer.line_to(end_seg);
         } else if (full_red && collisions > 0 || collisions >= too_many_lines)
             && !visited.contains_key(&connection_point)
@@ -173,7 +173,7 @@ pub fn draw_segment_lines(
             drawer.priority_finish();
             drawer.set_color(colors[cur_color]);
 
-            if collisions > too_many_lines {
+            if collisions > too_many_lines && !full_red {
                 draw_label(pixmap, prev_loc, loc, stroke, scale, collisions);
             }
         }

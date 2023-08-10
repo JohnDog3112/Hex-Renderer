@@ -205,15 +205,6 @@ impl Pattern {
         let y_coord = (center.1 / y_factor).round() as i32;
         let x_coord = (center.0 - 0.5 * y_coord as f32) as i32;
 
-        println!(
-            "{:?}, {:?}, {:?}, {:?}, {:?}, {:?}",
-            self.bottom_right,
-            self.top_left,
-            center,
-            x_coord,
-            y_coord,
-            HexCoord::from(Coord(x_coord, y_coord))
-        );
         let coord = Coord(x_coord, y_coord);
         if !self.points.contains(&coord) {
             draw_points(
