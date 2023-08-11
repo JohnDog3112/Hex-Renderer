@@ -2,7 +2,7 @@
 pub mod pattern_utils;
 
 mod pattern;
-pub use pattern::Pattern;
+pub use pattern::*;
 
 pub mod grids;
 
@@ -27,7 +27,7 @@ mod tests {
             .split(", ")
             .filter_map(|str| Pattern::try_from(str).map_or(None, |pattern| Some(pattern)))
             .collect();
-        let grid = HexGrid::new(patterns.clone(), 30).unwrap();
+        let grid = HexGrid::new_normal(patterns.clone(), 30).unwrap();
         b.iter(|| grid.draw_grid_png(50.0, &defaults::SEGMENT));
     }
 }

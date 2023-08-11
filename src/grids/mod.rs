@@ -9,9 +9,9 @@ use std::{collections::HashSet, fs, io};
 use tiny_skia::Pixmap;
 
 use crate::{
-    options::{GridOptions, GridPatternOptions},
+    options::{GridOptions, GridPatternOptions, Intersections, Lines},
+    pattern::PatternVariant,
     pattern_utils::HexCoord,
-    Pattern,
 };
 
 #[derive(Debug)]
@@ -62,7 +62,7 @@ pub trait GridDraw {
 
 fn draw_grid(
     size: HexCoord,
-    patterns: &Vec<(Pattern, HexCoord, f32)>,
+    patterns: &Vec<(PatternVariant, HexCoord, f32)>,
     options: &GridOptions,
     scale: f32,
 ) -> Result<Pixmap, GridDrawError> {
@@ -104,6 +104,38 @@ fn draw_grid(
         (intros, retros)
     };
 
+    let monocolor_lines = lines
+        .iter()
+        .map(|line| {
+            Lines::Monocolor(match line {
+                Lines::Monocolor(color) => *color,
+                Lines::Gradient {
+                    colors,
+                    segments_per_color: _,
+                    bent: _,
+                } => colors[0],
+                Lines::SegmentColors {
+                    colors,
+                    triangles: _,
+                    collisions: _,
+                } => colors[0],
+            })
+        })
+        .collect::<Vec<Lines>>();
+
+    let monocolor_intersections = intersections
+        .iter()
+        .map(|intersection| match intersection {
+            Intersections::Nothing => Intersections::Nothing,
+            Intersections::UniformPoints(point) => Intersections::UniformPoints(*point),
+            Intersections::EndsAndMiddle {
+                start: _,
+                end: _,
+                middle,
+            } => Intersections::UniformPoints(*middle),
+        })
+        .collect::<Vec<Intersections>>();
+
     let max_radius = options.get_max_radius();
 
     let border_size = max_radius * scale;
@@ -123,25 +155,39 @@ fn draw_grid(
     for (pattern, location, local_scale) in patterns {
         let location = *location * scale + offset;
 
-        if intros.contains(&pattern.angles) {
+        if intros.contains(&pattern.get_inner().angles) {
             increment = true;
-        } else if retros.contains(&pattern.angles) {
+        } else if retros.contains(&pattern.get_inner().angles) {
             if lines_index == 0 {
                 lines_index = lines.len() - 1;
             } else {
                 lines_index -= 1;
             }
         }
-
-        pattern.draw_pattern(
-            &mut pixmap,
-            location,
-            scale * *local_scale,
-            options.line_thickness,
-            &lines[lines_index],
-            &intersections[lines_index],
-            &options.center_dot,
-        );
+        match pattern {
+            PatternVariant::Normal(pattern) => {
+                pattern.draw_pattern(
+                    &mut pixmap,
+                    location,
+                    scale * *local_scale,
+                    options.line_thickness,
+                    &lines[lines_index],
+                    &intersections[lines_index],
+                    &options.center_dot,
+                );
+            }
+            PatternVariant::Monocolor(pattern) => {
+                pattern.draw_pattern(
+                    &mut pixmap,
+                    location,
+                    scale * *local_scale,
+                    options.line_thickness,
+                    &monocolor_lines[lines_index],
+                    &monocolor_intersections[lines_index],
+                    &options.center_dot,
+                );
+            }
+        }
 
         if increment {
             increment = false;

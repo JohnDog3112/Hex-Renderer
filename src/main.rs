@@ -1,7 +1,7 @@
 use hex_renderer::{
     defaults,
     grids::{GridDraw, HexGrid, SquareGrid},
-    Pattern,
+    Pattern, PatternVariant,
 };
 
 fn main() {
@@ -45,11 +45,26 @@ fn main() {
     let x_pad = 0.2;
     let y_pad = 0.1;
 
-    let grid = SquareGrid::new(patterns.clone(), 10, max_scale, x_pad, y_pad).unwrap();
-    grid.draw_grid_to_file("square.png", global_scale, &defaults::GRADIENT)
+    let mut count = 0;
+
+    let variants = patterns
+        .clone()
+        .into_iter()
+        .map(|pattern| {
+            count += 1;
+            if count % 10 == 0 {
+                PatternVariant::Monocolor(pattern)
+            } else {
+                PatternVariant::Normal(pattern)
+            }
+        })
+        .collect();
+
+    let grid = SquareGrid::new(variants, 10, max_scale, x_pad, y_pad).unwrap();
+    grid.draw_grid_to_file("square.png", global_scale, &defaults::SEGMENT)
         .unwrap();
 
-    let grid = HexGrid::new(patterns, 40).unwrap();
+    let grid = HexGrid::new_normal(patterns, 40).unwrap();
     grid.draw_grid_to_file("image.png", global_scale, &defaults::SEGMENT)
         .unwrap();
 }

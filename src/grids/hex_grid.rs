@@ -2,20 +2,30 @@ use tiny_skia::Pixmap;
 
 use crate::{
     options::GridOptions,
-    pattern::Pattern,
+    pattern::PatternVariant,
     pattern_utils::{Coord, HexCoord},
+    Pattern,
 };
 
 use super::{GridCreationError, GridDraw, GridDrawError};
 
 #[derive(Debug)]
 pub struct HexGrid {
-    patterns: Vec<(Pattern, HexCoord, f32)>,
+    patterns: Vec<(PatternVariant, HexCoord, f32)>,
     bottom_right: HexCoord,
 }
 
 impl HexGrid {
-    pub fn new(patterns: Vec<Pattern>, max_width: i32) -> Result<Self, GridCreationError> {
+    pub fn new_normal(patterns: Vec<Pattern>, max_width: i32) -> Result<Self, GridCreationError> {
+        Self::new(
+            patterns
+                .into_iter()
+                .map(|pattern| PatternVariant::Normal(pattern))
+                .collect(),
+            max_width,
+        )
+    }
+    pub fn new(patterns: Vec<PatternVariant>, max_width: i32) -> Result<Self, GridCreationError> {
         if patterns.len() == 0 {
             return Err(GridCreationError::EmptyPatternList);
         } else if max_width < 1 {
@@ -35,7 +45,7 @@ impl HexGrid {
         let mut offset_left = true;
 
         for index in 0..patterns.len() {
-            let pattern = &patterns[index];
+            let pattern = &patterns[index].get_inner();
             let height = pattern.bottom_right.1 - pattern.top_left.1;
 
             if index == 0 {
@@ -54,7 +64,7 @@ impl HexGrid {
                     offset_left = false;
                 }
             } else {
-                let prev_pattern = &patterns[index - 1];
+                let prev_pattern = patterns[index - 1].get_inner();
                 let mut max_distance_decrease = i32::MAX;
                 for i in 0..pattern
                     .left_perimiter
@@ -98,7 +108,7 @@ impl HexGrid {
 
                 max_y_row = 0;
 
-                for point in &patterns[index - 1].right_perimiter {
+                for point in &patterns[index - 1].get_inner().right_perimiter {
                     let point = HexCoord::from(*point + locations[index - 1]);
                     if point.0 > max_x {
                         max_x = point.0;
@@ -116,7 +126,7 @@ impl HexGrid {
 
         if current_y == 0 {
             let index = patterns.len() - 1;
-            for point in &patterns[index].right_perimiter {
+            for point in &patterns[index].get_inner().right_perimiter {
                 let point = HexCoord::from(*point + locations[index]);
                 if point.0 > max_x {
                     max_x = point.0;

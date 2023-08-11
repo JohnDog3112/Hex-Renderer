@@ -1,18 +1,37 @@
 use tiny_skia::Pixmap;
 
-use crate::options::GridOptions;
-use crate::{pattern_utils::HexCoord, Pattern};
+use crate::pattern::PatternVariant;
+use crate::pattern_utils::HexCoord;
+use crate::{options::GridOptions, Pattern};
 
 use super::{GridCreationError, GridDraw, GridDrawError};
 
 pub struct SquareGrid {
-    patterns: Vec<(Pattern, HexCoord, f32)>,
+    patterns: Vec<(PatternVariant, HexCoord, f32)>,
     size: HexCoord,
 }
 
 impl SquareGrid {
-    pub fn new(
+    pub fn new_normal(
         patterns: Vec<Pattern>,
+        max_width: usize,
+        max_scale: f32,
+        x_pad: f32,
+        y_pad: f32,
+    ) -> Result<Self, GridCreationError> {
+        Self::new(
+            patterns
+                .into_iter()
+                .map(|pattern| PatternVariant::Normal(pattern))
+                .collect(),
+            max_width,
+            max_scale,
+            x_pad,
+            y_pad,
+        )
+    }
+    pub fn new(
+        patterns: Vec<PatternVariant>,
         max_width: usize,
         max_scale: f32,
         x_pad: f32,
@@ -23,9 +42,10 @@ impl SquareGrid {
         } else if max_width == 0 || x_pad < 0.0 || y_pad < 0.0 {
             return Err(GridCreationError::NegativeInput);
         }
-        let mut new_patterns: Vec<(Pattern, HexCoord, f32)> = Vec::new();
+        let mut new_patterns: Vec<(PatternVariant, HexCoord, f32)> = Vec::new();
 
         for (i, pattern) in patterns.clone().into_iter().enumerate() {
+            let pattern_ref = pattern.get_inner();
             let y = i / max_width;
             let x = i - y * max_width;
 
@@ -34,13 +54,13 @@ impl SquareGrid {
 
             let pos = HexCoord(x, y);
 
-            let area = pattern.bottom_right_bound - pattern.top_left_bound;
+            let area = pattern_ref.bottom_right_bound - pattern_ref.top_left_bound;
 
             let largest_bound = area.0.max(area.1);
 
             let scale = (1.0 / largest_bound).min(max_scale);
 
-            let center = area / 2.0 + pattern.top_left_bound;
+            let center = area / 2.0 + pattern_ref.top_left_bound;
 
             let pattern_loc = pos + HexCoord(0.5, 0.5) - center * scale;
 
