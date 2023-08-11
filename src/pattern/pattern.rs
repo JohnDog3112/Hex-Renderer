@@ -226,7 +226,11 @@ impl Pattern {
         let x_coord = (center.0 - 0.5 * y_coord as f32) as i32;
 
         let coord = Coord(x_coord, y_coord);
-        if !self.points.contains(&coord) {
+        let index = (coord.1 - self.top_left.1) as usize;
+        if !self.points.contains(&coord)
+            && self.left_perimiter[index].0 < coord.0
+            && coord.0 < self.right_perimiter[index].0
+        {
             draw_points(
                 &vec![Coord(x_coord, y_coord)],
                 pixmap,
