@@ -4,7 +4,7 @@ pub use hex_grid::HexGrid;
 mod square_grid;
 pub use square_grid::SquareGrid;
 
-use std::collections::HashSet;
+use std::{collections::HashSet, fs, io};
 
 use tiny_skia::Pixmap;
 
@@ -14,12 +14,62 @@ use crate::{
     Pattern,
 };
 
+#[derive(Debug)]
+pub enum GridError {
+    FileError(GridFileError),
+    DrawError(GridDrawError),
+    CreationError(GridCreationError),
+}
+
+#[derive(Debug)]
+pub enum GridFileError {
+    SaveError(io::Error),
+    DrawError(GridDrawError),
+}
+#[derive(Debug)]
+pub enum GridDrawError {
+    ImproperScale(f32),
+    EncodeError,
+}
+#[derive(Debug)]
+pub enum GridCreationError {
+    NegativeInput,
+    EmptyPatternList,
+}
+
+pub trait GridDraw {
+    fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError>;
+
+    fn draw_grid_png(&self, scale: f32, options: &GridOptions) -> Result<Vec<u8>, GridDrawError> {
+        self.draw_grid(scale, options)?
+            .encode_png()
+            .map_err(|_| GridDrawError::EncodeError)
+    }
+    fn draw_grid_to_file(
+        &self,
+        file_name: &str,
+        scale: f32,
+        options: &GridOptions,
+    ) -> Result<(), GridFileError> {
+        fs::write(
+            file_name,
+            self.draw_grid_png(scale, options)
+                .map_err(|err| GridFileError::DrawError(err))?,
+        )
+        .map_err(|err| GridFileError::SaveError(err))
+    }
+}
+
 fn draw_grid(
     size: HexCoord,
     patterns: &Vec<(Pattern, HexCoord, f32)>,
     options: &GridOptions,
     scale: f32,
-) -> Vec<u8> {
+) -> Result<Pixmap, GridDrawError> {
+    if scale < 1.0 {
+        return Err(GridDrawError::ImproperScale(scale));
+    }
+
     let intersections;
     let lines;
     let intro_angles;
@@ -99,5 +149,5 @@ fn draw_grid(
         }
     }
 
-    pixmap.encode_png().unwrap()
+    Ok(pixmap)
 }

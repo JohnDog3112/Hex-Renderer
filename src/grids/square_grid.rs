@@ -1,7 +1,9 @@
-use std::fs;
+use tiny_skia::Pixmap;
 
 use crate::options::GridOptions;
 use crate::{pattern_utils::HexCoord, Pattern};
+
+use super::{GridCreationError, GridDraw, GridDrawError};
 
 pub struct SquareGrid {
     patterns: Vec<(Pattern, HexCoord, f32)>,
@@ -15,7 +17,12 @@ impl SquareGrid {
         max_scale: f32,
         x_pad: f32,
         y_pad: f32,
-    ) -> Self {
+    ) -> Result<Self, GridCreationError> {
+        if patterns.len() == 0 {
+            return Err(GridCreationError::EmptyPatternList);
+        } else if max_width == 0 || x_pad < 0.0 || y_pad < 0.0 {
+            return Err(GridCreationError::NegativeInput);
+        }
         let mut new_patterns: Vec<(Pattern, HexCoord, f32)> = Vec::new();
 
         for (i, pattern) in patterns.clone().into_iter().enumerate() {
@@ -28,8 +35,6 @@ impl SquareGrid {
             let pos = HexCoord(x, y);
 
             let area = pattern.bottom_right_bound - pattern.top_left_bound;
-
-            println!("{:?}", area);
 
             let largest_bound = area.0.max(area.1);
 
@@ -47,16 +52,15 @@ impl SquareGrid {
             (new_patterns.len() as f32 / max_width as f32).ceil() * (1.0 + y_pad) - y_pad,
         );
 
-        Self {
+        Ok(Self {
             patterns: new_patterns,
             size,
-        }
+        })
     }
+}
 
-    pub fn draw_grid(&self, scale: f32, options: &GridOptions) -> Vec<u8> {
+impl GridDraw for SquareGrid {
+    fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError> {
         super::draw_grid(self.size, &self.patterns, options, scale)
-    }
-    pub fn draw_grid_to_file(&self, file_name: &str, scale: f32, options: &GridOptions) {
-        fs::write(file_name, self.draw_grid(scale, options)).unwrap();
     }
 }

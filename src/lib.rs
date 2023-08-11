@@ -15,7 +15,7 @@ extern crate test;
 
 #[cfg(test)]
 mod tests {
-    use crate::grids::HexGrid;
+    use crate::grids::{GridDraw, HexGrid};
 
     use super::*;
     use test::Bencher;
@@ -27,7 +27,7 @@ mod tests {
             .split(", ")
             .filter_map(|str| Pattern::try_from(str).map_or(None, |pattern| Some(pattern)))
             .collect();
-        let grid = HexGrid::generate_grid(patterns.clone(), 30);
-        b.iter(|| grid.draw_grid(50.0, &defaults::SEGMENT));
+        let grid = HexGrid::new(patterns.clone(), 30).unwrap();
+        b.iter(|| grid.draw_grid_png(50.0, &defaults::SEGMENT));
     }
 }

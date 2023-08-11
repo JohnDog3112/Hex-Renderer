@@ -1,6 +1,6 @@
 use hex_renderer::{
     defaults,
-    grids::{HexGrid, SquareGrid},
+    grids::{GridDraw, HexGrid, SquareGrid},
     Pattern,
 };
 
@@ -45,9 +45,11 @@ fn main() {
     let x_pad = 0.2;
     let y_pad = 0.1;
 
-    let grid = SquareGrid::new(patterns.clone(), 10, max_scale, x_pad, y_pad);
-    grid.draw_grid_to_file("square.png", global_scale, &defaults::GRADIENT);
+    let grid = SquareGrid::new(patterns.clone(), 10, max_scale, x_pad, y_pad).unwrap();
+    grid.draw_grid_to_file("square.png", global_scale, &defaults::GRADIENT)
+        .unwrap();
 
-    let grid = HexGrid::generate_grid(patterns, 50);
-    grid.draw_grid_to_file("image.png", global_scale, &defaults::SEGMENT);
+    let grid = HexGrid::new(patterns, 40).unwrap();
+    grid.draw_grid_to_file("image.png", global_scale, &defaults::SEGMENT)
+        .unwrap();
 }

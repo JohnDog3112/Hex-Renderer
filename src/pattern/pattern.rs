@@ -14,6 +14,11 @@ use super::{
     draw_gradient::draw_gradient_lines, draw_monocolor::draw_monocolor_lines,
     draw_segments::draw_segment_lines, point::draw_points,
 };
+#[derive(Debug, Clone)]
+pub enum PatternVariant {
+    Normal(Pattern),
+    Monocolor(Pattern),
+}
 
 #[derive(Debug, Clone)]
 pub struct Pattern {
@@ -229,6 +234,15 @@ impl Pattern {
                 scale,
                 center_dot,
             );
+        }
+    }
+}
+
+impl PatternVariant {
+    pub fn get_inner(&self) -> &Pattern {
+        match self {
+            PatternVariant::Normal(pattern) => pattern,
+            PatternVariant::Monocolor(pattern) => pattern,
         }
     }
 }

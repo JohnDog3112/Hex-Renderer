@@ -1,10 +1,12 @@
-use std::fs;
+use tiny_skia::Pixmap;
 
 use crate::{
     options::GridOptions,
     pattern::Pattern,
     pattern_utils::{Coord, HexCoord},
 };
+
+use super::{GridCreationError, GridDraw, GridDrawError};
 
 #[derive(Debug)]
 pub struct HexGrid {
@@ -13,7 +15,12 @@ pub struct HexGrid {
 }
 
 impl HexGrid {
-    pub fn generate_grid(patterns: Vec<Pattern>, max_width: i32) -> Self {
+    pub fn new(patterns: Vec<Pattern>, max_width: i32) -> Result<Self, GridCreationError> {
+        if patterns.len() == 0 {
+            return Err(GridCreationError::EmptyPatternList);
+        } else if max_width < 1 {
+            return Err(GridCreationError::NegativeInput);
+        }
         let mut locations = Vec::new();
 
         let max_width = max_width as f32;
@@ -128,20 +135,18 @@ impl HexGrid {
             packed_patterns.push((pattern, location, 1.0));
         }
 
-        HexGrid {
+        Ok(HexGrid {
             patterns: packed_patterns,
             bottom_right: HexCoord(
                 max_x - left_offset.0,
                 HexCoord::get_y(current_y + max_y_row),
             ),
-        }
+        })
     }
+}
 
-    pub fn draw_grid_to_file(&self, file_name: &str, scale: f32, options: &GridOptions) {
-        fs::write(file_name, self.draw_grid(scale, options)).unwrap();
-    }
-
-    pub fn draw_grid(&self, scale: f32, options: &GridOptions) -> Vec<u8> {
+impl GridDraw for HexGrid {
+    fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError> {
         super::draw_grid(self.bottom_right, &self.patterns, options, scale)
     }
 }

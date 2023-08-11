@@ -125,15 +125,7 @@ impl GridPatternOptions {
                 retros: _,
             } => variations
                 .iter()
-                .map(|part| {
-                    let len = part.0.get_max_radius().max(part.1.get_max_radius());
-                    println!(
-                        "a: {}, {}",
-                        part.0.get_max_radius(),
-                        part.1.get_max_radius()
-                    );
-                    len
-                })
+                .map(|part| part.0.get_max_radius().max(part.1.get_max_radius()))
                 .fold(0.0, |a, b| a.max(b)),
         }
     }
