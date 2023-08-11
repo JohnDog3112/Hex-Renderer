@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use tiny_skia::{Color, LineCap, LineJoin, Pixmap, Stroke};
 
 use crate::{
-    options::{Intersections, Lines, Marker, Point},
+    options::{Intersections, Lines, Point},
     pattern_utils::{
         Angle, AngleParseError, ConnectionPoint, Coord, Direction, DirectionParseError,
         DynamicList, HexCoord,
@@ -17,20 +17,20 @@ use super::{
 
 #[derive(Debug, Clone)]
 pub struct Pattern {
-    pub path: Vec<Coord>,
-    pub top_left: Coord,
-    pub bottom_right: Coord,
+    pub(crate) path: Vec<Coord>,
+    pub(crate) top_left: Coord,
+    pub(crate) bottom_right: Coord,
 
-    top_left_bound: HexCoord,
-    bottom_right_bound: HexCoord,
+    pub(crate) top_left_bound: HexCoord,
+    pub(crate) bottom_right_bound: HexCoord,
 
-    pub left_perimiter: Vec<Coord>,
-    pub right_perimiter: Vec<Coord>,
+    pub(crate) left_perimiter: Vec<Coord>,
+    pub(crate) right_perimiter: Vec<Coord>,
 
-    pub points: Vec<Coord>,
-    pub angles: Vec<Angle>,
+    pub(crate) points: Vec<Coord>,
+    pub(crate) angles: Vec<Angle>,
 
-    pub collisions: HashMap<ConnectionPoint, i32>,
+    pub(crate) collisions: HashMap<ConnectionPoint, i32>,
 }
 
 impl Pattern {
@@ -126,6 +126,7 @@ impl Pattern {
         line_thickness: f32,
         line_options: &Lines,
         point_options: &Intersections,
+        center_dot: &Point,
     ) {
         let mut stroke = Stroke::default();
         stroke.width = line_thickness * scale;
@@ -226,10 +227,7 @@ impl Pattern {
                 pixmap,
                 origin,
                 scale,
-                &Point::Single(Marker {
-                    color: Color::WHITE,
-                    radius: 0.07,
-                }),
+                center_dot,
             );
         }
     }
