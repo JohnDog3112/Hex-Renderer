@@ -16,7 +16,7 @@ pub struct HexGrid {
 }
 
 impl HexGrid {
-    pub fn new_normal(patterns: Vec<Pattern>, max_width: i32) -> Result<Self, GridCreationError> {
+    pub fn new_normal(patterns: Vec<Pattern>, max_width: usize) -> Result<Self, GridCreationError> {
         Self::new(
             patterns
                 .into_iter()
@@ -25,7 +25,7 @@ impl HexGrid {
             max_width,
         )
     }
-    pub fn new(patterns: Vec<PatternVariant>, max_width: i32) -> Result<Self, GridCreationError> {
+    pub fn new(patterns: Vec<PatternVariant>, max_width: usize) -> Result<Self, GridCreationError> {
         if patterns.len() == 0 {
             return Err(GridCreationError::EmptyPatternList);
         } else if max_width < 1 {
@@ -158,5 +158,8 @@ impl HexGrid {
 impl GridDraw for HexGrid {
     fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError> {
         super::draw_grid(self.bottom_right, &self.patterns, options, scale)
+    }
+    fn get_unpadded_size(&self) -> (f32, f32) {
+        (self.bottom_right.0, self.bottom_right.1)
     }
 }

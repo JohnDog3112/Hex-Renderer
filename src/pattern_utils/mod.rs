@@ -2,19 +2,19 @@ mod angle;
 pub use angle::{Angle, AngleParseError};
 
 mod coord;
-pub use coord::Coord;
+pub(crate) use coord::Coord;
 
 mod direction;
 pub use direction::{Direction, DirectionParseError};
 
 mod dynamic_list;
-pub use dynamic_list::DynamicList;
+pub(crate) use dynamic_list::DynamicList;
 
 mod hex_coord;
-pub use hex_coord::HexCoord;
+pub(crate) use hex_coord::HexCoord;
 
 mod connection_point;
-pub use connection_point::ConnectionPoint;
+pub(crate) use connection_point::ConnectionPoint;
 
 mod line_drawer;
-pub use line_drawer::LineDrawer;
+pub(crate) use line_drawer::LineDrawer;

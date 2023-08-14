@@ -83,4 +83,7 @@ impl GridDraw for SquareGrid {
     fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError> {
         super::draw_grid(self.size, &self.patterns, options, scale)
     }
+    fn get_unpadded_size(&self) -> (f32, f32) {
+        (self.size.0, self.size.1)
+    }
 }

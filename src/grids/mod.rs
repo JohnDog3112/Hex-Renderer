@@ -40,6 +40,20 @@ pub enum GridCreationError {
 pub trait GridDraw {
     fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError>;
 
+    fn get_unpadded_size(&self) -> (f32, f32);
+    fn get_size(&self, options: &GridOptions) -> (f32, f32) {
+        let max_radius = options.get_max_radius();
+
+        let size = self.get_unpadded_size();
+        (max_radius * 2.0 + size.0, max_radius * 2.0 + size.1)
+    }
+
+    fn get_bound_scale(&self, bound: (f32, f32), options: &GridOptions) -> f32 {
+        let size = self.get_size(options);
+
+        (bound.0 / size.0).min(bound.1 / size.1).max(1.0)
+    }
+
     fn draw_grid_png(&self, scale: f32, options: &GridOptions) -> Result<Vec<u8>, GridDrawError> {
         self.draw_grid(scale, options)?
             .encode_png()

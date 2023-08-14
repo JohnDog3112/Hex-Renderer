@@ -33,9 +33,11 @@ fn main() {
 
     //let patterns_str = "HexPattern(WEST qqq)";
 
+    //let patterns_str = "NORTH_EAST qaq, EAST aa, NORTH_EAST qaq, EAST wa, WEST qqq, SOUTH_EAST a, SOUTH_EAST wwwdwdwwwawqqeqwqqwqeqwqq, EAST eee, SOUTH_EAST aqaaeaqaa, NORTH_EAST wdwaw, NORTH_EAST dadad";
+
     let patterns: Vec<Pattern> = patterns_str
         .split(", ")
-        .filter_map(|str| Pattern::try_from(str).map_or(None, |pattern| Some(pattern)))
+        .filter_map(|str| Pattern::try_from(str).ok())
         .collect();
 
     let global_scale = 100.0;
@@ -52,19 +54,19 @@ fn main() {
         .into_iter()
         .map(|pattern| {
             count += 1;
-            if count % 10 == 0 {
+            if false {
                 PatternVariant::Monocolor(pattern)
             } else {
                 PatternVariant::Normal(pattern)
             }
         })
-        .collect();
+        .collect::<Vec<_>>();
 
-    let grid = SquareGrid::new(variants, 10, max_scale, x_pad, y_pad).unwrap();
+    let grid = SquareGrid::new(variants.clone(), 10, max_scale, x_pad, y_pad).unwrap();
     grid.draw_grid_to_file("square.png", global_scale, &defaults::SEGMENT)
         .unwrap();
 
-    let grid = HexGrid::new_normal(patterns, 40).unwrap();
+    let grid = HexGrid::new(variants, 40).unwrap();
     grid.draw_grid_to_file("image.png", global_scale, &defaults::SEGMENT)
         .unwrap();
 }
