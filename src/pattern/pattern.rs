@@ -87,6 +87,7 @@ impl Pattern {
         }
 
         let mut points = path.clone();
+        points.sort();
         points.dedup();
         Pattern {
             path,
