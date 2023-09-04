@@ -141,8 +141,8 @@ impl Pattern {
         let end_colors;
 
         match line_options {
-            Lines::Monocolor(color) => {
-                draw_monocolor_lines(&self, pixmap, &stroke, origin, scale, *color);
+            Lines::Monocolor { color, bent } => {
+                draw_monocolor_lines(&self, pixmap, &stroke, origin, scale, *color, *bent);
                 end_colors = (*color, *color);
             }
             Lines::Gradient {
@@ -153,7 +153,7 @@ impl Pattern {
                 if colors.len() < 2 {
                     let col = *colors.get(0).unwrap_or(&Color::WHITE);
                     end_colors = (col, col);
-                    draw_monocolor_lines(&self, pixmap, &stroke, origin, scale, col);
+                    draw_monocolor_lines(&self, pixmap, &stroke, origin, scale, col, *bent);
                 } else {
                     end_colors = (
                         colors[0],

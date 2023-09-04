@@ -3,7 +3,10 @@ use tiny_skia::Color;
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Lines {
-    Monocolor(Color),
+    Monocolor {
+        color: Color,
+        bent: bool,
+    },
     Gradient {
         colors: Vec<Color>,
         segments_per_color: usize,
@@ -245,8 +248,8 @@ impl Triangle {
 impl Lines {
     pub fn get_max_radius(&self) -> f32 {
         match self {
-            Lines::Monocolor(_) => 0.0,
-            Lines::Gradient {
+            Lines::Monocolor { color: _, bent: _ }
+            | Lines::Gradient {
                 colors: _,
                 segments_per_color: _,
                 bent: _,

@@ -41,7 +41,14 @@ pub mod components {
         lazy_static! {
             pub static ref MONOCOLOR_INTERSECTION: Intersections =
                 Intersections::UniformPoints(*POINT);
-            pub static ref UNIFORM_MONOCOLOR_LINE: Lines = Lines::Monocolor(palettes::DEFAULT[0]);
+            pub static ref UNIFORM_MONOCOLOR_LINE: Lines = Lines::Monocolor {
+                color: palettes::DEFAULT[0],
+                bent: false
+            };
+            pub static ref UNIFORM_BENT_MONOCOLOR_LINE: Lines = Lines::Monocolor {
+                color: palettes::DEFAULT[0],
+                bent: true
+            };
         }
     }
     pub mod gradient {
@@ -132,10 +139,26 @@ mod grids {
             GridPatternOptions::Uniform(*MONOCOLOR_INTERSECTION, UNIFORM_MONOCOLOR_LINE.clone()),
             *CENTER_DOT
         );
+        pub static ref UNIFORM_BENT_MONOCOLOR: GridOptions = GridOptions::generate(
+            GridPatternOptions::Uniform(
+                *MONOCOLOR_INTERSECTION,
+                UNIFORM_BENT_MONOCOLOR_LINE.clone()
+            ),
+            *CENTER_DOT
+        );
         pub static ref MONOCOLOR: GridOptions = GridOptions::generate(
             GridPatternOptions::gen_changing_monocolor(
                 *MONOCOLOR_INTERSECTION,
                 palettes::DEFAULT.to_vec(),
+                false
+            ),
+            *CENTER_DOT
+        );
+        pub static ref BENT_MONOCOLOR: GridOptions = GridOptions::generate(
+            GridPatternOptions::gen_changing_monocolor(
+                *MONOCOLOR_INTERSECTION,
+                palettes::DEFAULT.to_vec(),
+                true
             ),
             *CENTER_DOT
         );

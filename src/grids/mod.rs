@@ -120,9 +120,10 @@ fn draw_grid(
 
     let monocolor_lines = lines
         .iter()
-        .map(|line| {
-            Lines::Monocolor(match line {
-                Lines::Monocolor(color) => *color,
+        .map(|line| Lines::Monocolor {
+            bent: false,
+            color: match line {
+                Lines::Monocolor { color, bent: _ } => *color,
                 Lines::Gradient {
                     colors,
                     segments_per_color: _,
@@ -133,7 +134,7 @@ fn draw_grid(
                     triangles: _,
                     collisions: _,
                 } => colors[0],
-            })
+            },
         })
         .collect::<Vec<Lines>>();
 

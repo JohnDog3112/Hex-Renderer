@@ -60,12 +60,16 @@ impl GridPatternOptions {
             defaults::RETRO_ANGLES.to_vec(),
         )
     }
-    pub fn gen_changing_monocolor(intersection: Intersections, colors: Vec<Color>) -> Self {
+    pub fn gen_changing_monocolor(
+        intersection: Intersections,
+        colors: Vec<Color>,
+        bent: bool,
+    ) -> Self {
         GridPatternOptions::generate_default_changing(
             intersection,
             colors
                 .into_iter()
-                .map(|color| Lines::Monocolor(color))
+                .map(|color| Lines::Monocolor { color, bent })
                 .collect(),
         )
     }
