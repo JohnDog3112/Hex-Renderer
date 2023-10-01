@@ -8,6 +8,7 @@ pub enum Angle {
     Left = 5,
 }
 
+#[derive(Debug)]
 pub struct AngleParseError(pub char);
 
 impl TryFrom<char> for Angle {
