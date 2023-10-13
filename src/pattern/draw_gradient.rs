@@ -8,13 +8,14 @@ use crate::pattern_utils::{Coord, HexCoord, LineDrawer};
 
 use super::Pattern;
 
+#[allow(clippy::too_many_arguments)]
 pub fn draw_gradient_lines(
     pattern: &Pattern,
     pixmap: &mut Pixmap,
     stroke: &Stroke,
     origin: HexCoord,
     scale: f32,
-    colors: &Vec<Color>,
+    colors: &[Color],
     segs_per_color: usize,
     bent_corners: bool,
 ) -> Color {
@@ -22,8 +23,8 @@ pub fn draw_gradient_lines(
 
     let mut grad_colors = Vec::new();
 
-    for i in 0..colors.len().min(pattern.path.len() / segs_per_color + 2) {
-        let col = colors[i];
+    for col in colors.iter().take(pattern.path.len() / segs_per_color + 2) {
+        //let col = colors[i];
         grad_colors.push([col.red(), col.green(), col.blue(), col.alpha()]);
     }
 
@@ -31,8 +32,8 @@ pub fn draw_gradient_lines(
 
     for i in 1..grad_colors.len() {
         let mut col = [0.0; 4];
-        for j in 0..4 {
-            col[j] = grad_colors[i][j] - grad_colors[i - 1][j];
+        for (j, col) in col.iter_mut().enumerate() {
+            *col = grad_colors[i][j] - grad_colors[i - 1][j];
         }
         grad_diffs.push(col);
     }
@@ -54,8 +55,10 @@ pub fn draw_gradient_lines(
             }
         }
     }
-    let mut paint = Paint::default();
-    paint.anti_alias = false;
+    let paint = Paint::<'_> {
+        anti_alias: false,
+        ..Default::default()
+    };
     let mut line_drawer = LineDrawer::new(origin, stroke.clone(), paint);
 
     let mut prev_shade_color =
@@ -70,8 +73,8 @@ pub fn draw_gradient_lines(
         let seg_progress =
             (progress - (grad_seg as f32 / grad_segments as f32)) * grad_segments as f32;
 
-        for j in 0..4 {
-            cur_color[j] =
+        for (j, cur_color) in cur_color.iter_mut().enumerate() {
+            *cur_color =
                 (grad_colors[grad_seg][j] + grad_diffs[grad_seg][j] * seg_progress).clamp(0.0, 1.0);
         }
 
@@ -112,5 +115,5 @@ pub fn draw_gradient_lines(
 
     line_drawer.draw_all(pixmap);
 
-    return colors[grad_colors.len() - 1];
+    colors[grad_colors.len() - 1]
 }

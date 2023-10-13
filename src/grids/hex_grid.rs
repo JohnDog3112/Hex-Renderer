@@ -18,15 +18,12 @@ pub struct HexGrid {
 impl HexGrid {
     pub fn new_normal(patterns: Vec<Pattern>, max_width: usize) -> Result<Self, GridCreationError> {
         Self::new(
-            patterns
-                .into_iter()
-                .map(|pattern| PatternVariant::Normal(pattern))
-                .collect(),
+            patterns.into_iter().map(PatternVariant::Normal).collect(),
             max_width,
         )
     }
     pub fn new(patterns: Vec<PatternVariant>, max_width: usize) -> Result<Self, GridCreationError> {
-        if patterns.len() == 0 {
+        if patterns.is_empty() {
             return Err(GridCreationError::EmptyPatternList);
         } else if max_width < 1 {
             return Err(GridCreationError::NegativeInput);

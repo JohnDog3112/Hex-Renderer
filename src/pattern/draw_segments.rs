@@ -16,6 +16,7 @@ use super::{
     Pattern,
 };
 
+#[allow(clippy::too_many_arguments)]
 pub fn draw_segment_lines(
     pattern: &Pattern,
     pixmap: &mut Pixmap,
@@ -108,9 +109,8 @@ pub fn draw_segment_lines(
 
         let collisions = pattern.collisions.get(&connection_point).unwrap_or(&-1) + 1;
 
-        let (visited_count, collision_start) = *visited
-            .get(&connection_point)
-            .unwrap_or(&(0, point.clone()));
+        let (visited_count, collision_start) =
+            *visited.get(&connection_point).unwrap_or(&(0, *point));
 
         let (start, end, triangle_scale) = if collisions == 0 || full_dash {
             last_collision_lane = None;
@@ -207,16 +207,10 @@ pub fn draw_segment_lines(
             drawer.priority_finish();
             drawer.set_color(colors[cur_color]);
 
-            if collisions >= too_many_lines && !full_dash && label.is_some() {
-                draw_label(
-                    pixmap,
-                    label.unwrap(),
-                    prev_loc,
-                    loc,
-                    stroke,
-                    scale,
-                    collisions,
-                );
+            if collisions >= too_many_lines && !full_dash {
+                if let Some(label) = label {
+                    draw_label(pixmap, label, prev_loc, loc, stroke, scale, collisions);
+                }
             }
         }
 
@@ -289,8 +283,8 @@ fn add_lane(
     let mut lane = preferred_lane % collisions;
     if let Some(visited) = travelled_collisions.get_mut(&connection_point) {
         if visited[lane as usize] {
-            for j in 0..visited.len() {
-                if !visited[j] {
+            for (j, &visited) in visited.iter().enumerate() {
+                if !visited {
                     lane = j as i32;
                     break;
                 }
@@ -361,9 +355,13 @@ fn draw_label(
     let mut paint = Paint::default();
     paint.set_color(label.color);
 
-    let mut stroke = Stroke::default();
-    stroke.width = radius * 2.0;
-    stroke.line_cap = LineCap::Butt;
+    let stroke = Stroke {
+        width: radius * 2.0,
+        line_cap: LineCap::Butt,
+        ..Default::default()
+    };
+    //stroke.width = radius * 2.0;
+    //stroke.line_cap = LineCap::Butt;
 
     let mut path = PathBuilder::new();
     path.move_to(line_point.0, line_point.1);

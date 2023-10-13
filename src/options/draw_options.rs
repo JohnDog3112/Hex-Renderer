@@ -140,18 +140,17 @@ impl Triangle {
                     radius: *match_radius,
                     color,
                 };
-                let marker;
-                if *match_radius > border.radius {
-                    marker = Point::Double {
+                let marker = if *match_radius > border.radius {
+                    Point::Double {
                         inner: *border,
                         outer: match_marker,
-                    };
+                    }
                 } else {
-                    marker = Point::Double {
+                    Point::Double {
                         inner: match_marker,
                         outer: *border,
-                    };
-                }
+                    }
+                };
                 Some(marker)
             }
         }
@@ -171,22 +170,21 @@ impl Triangle {
                 match_radius,
                 border,
             } => {
-                let marker;
                 let match_marker = Marker {
                     color: start_color,
                     radius: *match_radius,
                 };
-                if *match_radius > border.radius {
-                    marker = Point::Double {
+                let marker = if *match_radius > border.radius {
+                    Point::Double {
                         inner: *border,
                         outer: match_marker,
-                    };
+                    }
                 } else {
-                    marker = Point::Double {
+                    Point::Double {
                         outer: *border,
                         inner: match_marker,
-                    };
-                }
+                    }
+                };
                 Some(marker)
             }
         }

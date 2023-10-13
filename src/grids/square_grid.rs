@@ -20,10 +20,7 @@ impl SquareGrid {
         y_pad: f32,
     ) -> Result<Self, GridCreationError> {
         Self::new(
-            patterns
-                .into_iter()
-                .map(|pattern| PatternVariant::Normal(pattern))
-                .collect(),
+            patterns.into_iter().map(PatternVariant::Normal).collect(),
             max_width,
             max_scale,
             x_pad,
@@ -37,14 +34,14 @@ impl SquareGrid {
         x_pad: f32,
         y_pad: f32,
     ) -> Result<Self, GridCreationError> {
-        if patterns.len() == 0 {
+        if patterns.is_empty() {
             return Err(GridCreationError::EmptyPatternList);
         } else if max_width == 0 || x_pad < 0.0 || y_pad < 0.0 {
             return Err(GridCreationError::NegativeInput);
         }
         let mut new_patterns: Vec<(PatternVariant, HexCoord, f32)> = Vec::new();
 
-        for (i, pattern) in patterns.clone().into_iter().enumerate() {
+        for (i, pattern) in patterns.into_iter().enumerate() {
             let pattern_ref = pattern.get_inner();
             let y = i / max_width;
             let x = i - y * max_width;

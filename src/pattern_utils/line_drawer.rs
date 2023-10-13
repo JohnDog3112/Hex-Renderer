@@ -80,7 +80,7 @@ impl<'a> LineDrawer<'a> {
     pub fn draw(&mut self, pixmap: &mut Pixmap) {
         self.new_path(self.prev_point, self.stroke.clone(), self.paint.clone());
         for (path, stroke, paint) in self.paths.iter().rev() {
-            pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None)
+            pixmap.stroke_path(path, paint, stroke, Transform::identity(), None)
         }
     }
     pub fn draw_priority(self, pixmap: &mut Pixmap) {

@@ -9,7 +9,7 @@ const DEFAULT_BOUND: i32 = 10;
 impl<T> DynamicList<T> {
     pub fn new() -> DynamicList<T> {
         let mut contents = Vec::new();
-        for _ in 0..DEFAULT_BOUND*2 {
+        for _ in 0..DEFAULT_BOUND * 2 {
             contents.push(None);
         }
         DynamicList {
@@ -29,7 +29,7 @@ impl<T> DynamicList<T> {
             mem::swap(&mut old_contents, &mut self.contents);
 
             let new_bound = index - DEFAULT_BOUND;
-            for _ in 0..self.lower_bound-new_bound {
+            for _ in 0..self.lower_bound - new_bound {
                 self.contents.push(None);
             }
             self.lower_bound = new_bound;
@@ -39,9 +39,8 @@ impl<T> DynamicList<T> {
             }
 
             self.contents[(index - self.lower_bound) as usize] = Some(val);
-
         } else {
-            for _ in 0..index-upper_bound+DEFAULT_BOUND {
+            for _ in 0..index - upper_bound + DEFAULT_BOUND {
                 self.contents.push(None);
             }
             self.contents[offset_index] = Some(val);
@@ -56,8 +55,7 @@ impl<T> DynamicList<T> {
             &self.contents[offset_index]
         }
     }
-    pub fn to_vector(self) -> Vec<T> {
-        self.contents.into_iter().filter_map(|val| val).collect()
+    pub fn into_vector(self) -> Vec<T> {
+        self.contents.into_iter().flatten().collect()
     }
 }
-

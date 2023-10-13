@@ -1,5 +1,5 @@
-mod pattern;
-pub use pattern::*;
+mod pattern_internal;
+pub use pattern_internal::*;
 
 mod point;
 mod triangle;

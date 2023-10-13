@@ -95,8 +95,8 @@ impl Pattern {
             bottom_right,
             top_left_bound,
             bottom_right_bound,
-            left_perimiter: left_perimiter.to_vector(),
-            right_perimiter: right_perimiter.to_vector(),
+            left_perimiter: left_perimiter.into_vector(),
+            right_perimiter: right_perimiter.into_vector(),
             points,
             angles: links,
             collisions,
@@ -123,7 +123,7 @@ impl Pattern {
             right_perimiter.set(point.1, point);
         }
     }
-
+    #[allow(clippy::too_many_arguments)]
     pub fn draw_pattern(
         &self,
         pixmap: &mut Pixmap,
@@ -134,16 +134,21 @@ impl Pattern {
         point_options: &Intersections,
         center_dot: &Point,
     ) {
-        let mut stroke = Stroke::default();
-        stroke.width = line_thickness * scale;
-        stroke.line_cap = LineCap::Round;
-        stroke.line_join = LineJoin::Round;
+        let stroke = Stroke {
+            width: line_thickness * scale,
+            line_cap: LineCap::Round,
+            line_join: LineJoin::Round,
+            ..Default::default()
+        };
+        //stroke.width = line_thickness * scale;
+        //stroke.line_cap = LineCap::Round;
+        //stroke.line_join = LineJoin::Round;
 
         let end_colors;
 
         match line_options {
             Lines::Monocolor { color, bent } => {
-                draw_monocolor_lines(&self, pixmap, &stroke, origin, scale, *color, *bent);
+                draw_monocolor_lines(self, pixmap, &stroke, origin, scale, *color, *bent);
                 end_colors = (*color, *color);
             }
             Lines::Gradient {
@@ -154,12 +159,12 @@ impl Pattern {
                 if colors.len() < 2 {
                     let col = *colors.get(0).unwrap_or(&Color::WHITE);
                     end_colors = (col, col);
-                    draw_monocolor_lines(&self, pixmap, &stroke, origin, scale, col, *bent);
+                    draw_monocolor_lines(self, pixmap, &stroke, origin, scale, col, *bent);
                 } else {
                     end_colors = (
                         colors[0],
                         draw_gradient_lines(
-                            &self,
+                            self,
                             pixmap,
                             &stroke,
                             origin,
@@ -179,7 +184,7 @@ impl Pattern {
                 end_colors = (
                     colors[0],
                     draw_segment_lines(
-                        &self,
+                        self,
                         pixmap,
                         &stroke,
                         origin,
@@ -196,14 +201,14 @@ impl Pattern {
         match point_options {
             Intersections::Nothing => (),
             Intersections::UniformPoints(point) => {
-                draw_points(&self.points, pixmap, origin, scale, &point);
+                draw_points(&self.points, pixmap, origin, scale, point);
             }
             Intersections::EndsAndMiddle { start, end, middle } => {
                 let start_point = self.path[0];
                 let end_point = self.path[self.path.len() - 1];
 
-                let start = start.clone().into_point(end_colors.0);
-                let end = end.clone().into_point(end_colors.1);
+                let start = start.into_point(end_colors.0);
+                let end = end.into_point(end_colors.1);
 
                 draw_points(&vec![start_point], pixmap, origin, scale, &start);
                 if start_point != end_point {
@@ -216,12 +221,12 @@ impl Pattern {
                     .filter(|&point| point != start_point && point != end_point)
                     .collect();
 
-                draw_points(&middle_points, pixmap, origin, scale, &middle);
+                draw_points(&middle_points, pixmap, origin, scale, middle);
             }
         }
 
         let center = (self.bottom_right_bound + self.top_left_bound) / 2.0;
-        let y_factor = 0.866025403784;
+        let y_factor = 0.866_025_4;
 
         let y_coord = (center.1 / y_factor).round() as i32;
         let x_coord = (center.0 - 0.5 * y_coord as f32) as i32;
@@ -291,13 +296,13 @@ impl TryFrom<&str> for Pattern {
 
         let angles: Vec<Angle> = parts[1]
             .chars()
-            .map(|a| Angle::try_from(a))
+            .map(Angle::try_from)
             .collect::<Result<Vec<Angle>, AngleParseError>>()
             .map_err(|err| PatternParseError::InvalidAngle {
                 input: value.to_string(),
                 angle: err.0,
             })?;
 
-        return Ok(Pattern::new(direction, angles));
+        Ok(Pattern::new(direction, angles))
     }
 }

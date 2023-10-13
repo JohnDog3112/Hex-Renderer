@@ -5,7 +5,7 @@ use super::Coord;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HexCoord(pub f32, pub f32);
 
-const Y_FACTOR: f32 = 0.866025403784;
+const Y_FACTOR: f32 = 0.866_025_4;
 
 impl HexCoord {
     pub fn get_y(y: i32) -> f32 {

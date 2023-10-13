@@ -59,6 +59,7 @@ pub trait GridDraw {
             .encode_png()
             .map_err(|_| GridDrawError::EncodeError)
     }
+
     fn draw_grid_to_file(
         &self,
         file_name: &str,
@@ -68,9 +69,9 @@ pub trait GridDraw {
         fs::write(
             file_name,
             self.draw_grid_png(scale, options)
-                .map_err(|err| GridFileError::DrawError(err))?,
+                .map_err(GridFileError::DrawError)?,
         )
-        .map_err(|err| GridFileError::SaveError(err))
+        .map_err(GridFileError::SaveError)
     }
 }
 
@@ -101,7 +102,7 @@ fn draw_grid(
             intros,
             retros,
         } => {
-            (intersections, lines) = variations.into_iter().map(|a| (&a.0, &a.1)).unzip();
+            (intersections, lines) = variations.iter().map(|a| (&a.0, &a.1)).unzip();
             intro_angles = intros.clone();
             retro_angles = retros.clone();
         }
@@ -186,8 +187,8 @@ fn draw_grid(
                     location,
                     scale * *local_scale,
                     options.line_thickness,
-                    &lines[lines_index],
-                    &intersections[lines_index],
+                    lines[lines_index],
+                    intersections[lines_index],
                     &options.center_dot,
                 );
             }

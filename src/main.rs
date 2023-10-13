@@ -1,6 +1,5 @@
 use hex_renderer::{
-    defaults,
-    grids::{GridDraw, HexGrid, SquareGrid},
+    grids::{GridDraw, HexGrid},
     options::{self, GridOptions, Marker},
     Pattern, PatternVariant,
 };
@@ -44,15 +43,14 @@ fn main() {
 
     let global_scale = 100.0;
 
-    let max_scale = 0.4;
+    //let max_scale = 0.4;
 
-    let x_pad = 0.2;
-    let y_pad = 0.1;
+    //let x_pad = 0.2;
+    //let y_pad = 0.1;
 
     let mut count = 0;
 
     let variants = patterns
-        .clone()
         .into_iter()
         .map(|pattern| {
             count += 1;
