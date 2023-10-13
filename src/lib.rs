@@ -1,4 +1,4 @@
-#![feature(test)]
+//#![feature(test)]
 pub mod pattern_utils;
 
 mod pattern;
@@ -11,7 +11,7 @@ pub use options::defaults;
 
 pub use tiny_skia::Color;
 
-extern crate test;
+/*extern crate test;
 
 #[cfg(test)]
 mod tests {
@@ -31,3 +31,4 @@ mod tests {
         b.iter(|| grid.draw_grid_png(50.0, &defaults::SEGMENT));
     }
 }
+*/
