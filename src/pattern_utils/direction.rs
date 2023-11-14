@@ -3,12 +3,12 @@ use std::ops::Add;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
-    East = 0,
-    SouthEast = 1,
-    SouthWest = 2,
-    West = 3,
-    NorthWest = 4,
-    NorthEast = 5,
+    NorthEast = 0,
+    East = 1,
+    SouthEast = 2,
+    SouthWest = 3,
+    West = 4,
+    NorthWest = 5,
 }
 
 impl Add<Angle> for Direction {
@@ -63,12 +63,12 @@ impl TryFrom<u8> for Direction {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Direction::East),
-            1 => Ok(Direction::SouthEast),
-            2 => Ok(Direction::SouthWest),
-            3 => Ok(Direction::West),
-            4 => Ok(Direction::NorthWest),
-            5 => Ok(Direction::NorthEast),
+            0 => Ok(Direction::NorthEast),
+            1 => Ok(Direction::East),
+            2 => Ok(Direction::SouthEast),
+            3 => Ok(Direction::SouthWest),
+            4 => Ok(Direction::West),
+            5 => Ok(Direction::NorthWest),
             _ => Err(Self::Error::InvalidNumber(value)),
         }
     }
