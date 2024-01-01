@@ -2,8 +2,13 @@
 name = "hex_renderer"
 version = "0.1.0"
 edition = "2021"
+authors = ["JohnDog3112 <JohnDog3112@gmail.com>"]
+description = "Renderer for patterns in hexcasting (a mod for minecraft)"
+license = "MIT"
+repository = "https://github.com/JohnDog3112/Hex-Renderer"
+keywords = ["hexcasting", "hex"]
+categories = ["rendering"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 lazy_static = "1.4.0"
