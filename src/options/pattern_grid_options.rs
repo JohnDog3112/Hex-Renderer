@@ -8,7 +8,7 @@ use crate::{
 
 use super::{defaults::constants, CollisionOption, Point};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GridOptions {
     pub line_thickness: f32,
     pub pattern_options: GridPatternOptions,
@@ -16,7 +16,7 @@ pub struct GridOptions {
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum GridPatternOptions {
     Uniform(Intersections, Lines),
     Changing {
