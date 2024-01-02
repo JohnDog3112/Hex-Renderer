@@ -1,7 +1,6 @@
 use lazy_static::lazy_static;
-use tiny_skia::Color;
 
-use crate::options::{palettes, GridPatternOptions, Marker, Triangle};
+use crate::options::{palettes, GridPatternOptions, Marker, Triangle, Color};
 
 use super::{EndPoint, GridOptions, Intersections, Lines, Point};
 
@@ -56,7 +55,7 @@ pub mod components {
         lazy_static! {
             pub static ref GRADIENT_INTERSECTION: Intersections = Intersections::Nothing;
             pub static ref GRADIENT_MARKER: Marker = Marker {
-                color: Color::from_rgba8(255, 255, 255, 125),
+                color: Color(255, 255, 255, 125),
                 radius: GRADIENT_OUTER_RADIUS,
             };
             pub static ref GRADIENT_START_POINT: EndPoint = EndPoint::BorderedMatch {
@@ -101,7 +100,7 @@ pub mod components {
                 color: Color::WHITE,
                 radius: 0.1
             };
-            pub static ref COLLISION_COLOR: Color = Color::from_rgba8(255, 0, 0, 255);
+            pub static ref COLLISION_COLOR: Color = Color(255, 0, 0, 255);
             pub static ref COLLISION_OVERLOAD: OverloadOptions = OverloadOptions::LabeledDashes {
                 color: *COLLISION_COLOR,
                 label: *LABEL,

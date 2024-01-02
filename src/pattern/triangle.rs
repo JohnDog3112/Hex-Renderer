@@ -15,16 +15,16 @@ pub fn draw_triangle(
         Point::None => (),
         Point::Single(marker) => {
             let path = generate_triangle_path(location, next, marker.radius * scale);
-            paint.set_color(marker.color);
+            paint.set_color(marker.color.into());
             pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
         }
         Point::Double { inner, outer } => {
             let path = generate_triangle_path(location, next, outer.radius * scale);
-            paint.set_color(outer.color);
+            paint.set_color(outer.color.into());
             pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
 
             let path = generate_triangle_path(location, next, inner.radius * scale);
-            paint.set_color(inner.color);
+            paint.set_color(inner.color.into());
             pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
         }
     }

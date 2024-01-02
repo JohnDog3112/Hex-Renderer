@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use tiny_skia::{
-    Color, LineCap, LineJoin, Paint, PathBuilder, Pixmap, Stroke, StrokeDash, Transform,
+    LineCap, LineJoin, Paint, PathBuilder, Pixmap, Stroke, StrokeDash, Transform,
 };
 
 use crate::{
-    options::{CollisionOption, Marker, Triangle},
+    options::{CollisionOption, Marker, Triangle, Color},
     pattern::text::draw_text,
     pattern_utils::{ConnectionPoint, Coord, HexCoord, LineDrawer},
 };
@@ -40,7 +40,7 @@ pub fn draw_segment_lines(
     let mut last_collision_lane = None;
 
     let mut paint = Paint::default();
-    paint.set_color(colors[0]);
+    paint.set_color(colors[0].into());
     let mut drawer = LineDrawer::new(origin, stroke.clone(), paint);
 
     let mut prev_loc = origin;
@@ -156,7 +156,7 @@ pub fn draw_segment_lines(
 
             cur_color = get_next_color(cur_color, visited_colors, colors.len());
 
-            drawer.set_color(colors[cur_color]);
+            drawer.set_color(colors[cur_color].into());
         }
 
         if draw {
@@ -194,18 +194,18 @@ pub fn draw_segment_lines(
                 cur_color = get_next_color(cur_color, visited_colors, colors.len());
             }
             drawer.move_to(start_seg);
-            drawer.set_color(colors[cur_color]);
+            drawer.set_color(colors[cur_color].into());
 
             drawer.line_to(end_seg);
         } else if (full_dash && collisions > 0 || collisions >= too_many_lines)
             && !visited.contains_key(&connection_point)
         {
             drawer.set_stroke(collision_stroke.clone());
-            drawer.set_color(bad_color);
+            drawer.set_color(bad_color.into());
             drawer.move_to(prev_loc);
             drawer.line_to(loc);
             drawer.priority_finish();
-            drawer.set_color(colors[cur_color]);
+            drawer.set_color(colors[cur_color].into());
 
             if collisions >= too_many_lines && !full_dash {
                 if let Some(label) = label {
@@ -353,7 +353,7 @@ fn draw_label(
     let line_point = rotate_point(middle, middle + line_offset, -90f32.to_radians());
 
     let mut paint = Paint::default();
-    paint.set_color(label.color);
+    paint.set_color(label.color.into());
 
     let stroke = Stroke {
         width: radius * 2.0,
@@ -370,11 +370,11 @@ fn draw_label(
 
     pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
 
-    draw_point(pixmap, point, radius, label.color);
+    draw_point(pixmap, point, radius, label.color.into());
     draw_text(
         pixmap,
         &format!("{collisions}"),
-        Color::BLACK,
+        Color::BLACK.into(),
         point,
         radius,
     );

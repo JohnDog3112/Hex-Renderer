@@ -1,4 +1,6 @@
-use tiny_skia::Color;
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy)]
+pub struct Color(pub u8, pub u8, pub u8, pub u8);
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -82,6 +84,31 @@ pub enum Intersections {
     },
 }
 
+impl Color {
+    pub const WHITE: Self = Self(255, 255, 255, 255);
+    pub const BLACK: Self = Self(0, 0, 0, 255);
+}
+
+impl From<Color> for tiny_skia::Color {
+    fn from(value: Color) -> Self {
+        Self::from_rgba8(value.0, value.1, value.2, value.3)
+    }
+}
+impl From<tiny_skia::Color> for Color {
+    fn from(value: tiny_skia::Color) -> Self {
+        value.to_color_u8().into()
+    }
+}
+impl From<tiny_skia::ColorU8> for Color {
+    fn from(value: tiny_skia::ColorU8) -> Self {
+        Self(
+            value.red(),
+            value.green(),
+            value.blue(),
+            value.alpha()
+        )
+    }
+}
 impl From<Point> for EndPoint {
     fn from(value: Point) -> Self {
         EndPoint::Point(value)

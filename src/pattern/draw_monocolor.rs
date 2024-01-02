@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
-use tiny_skia::{Color, Paint, Pixmap, Stroke};
+use tiny_skia::{Paint, Pixmap, Stroke};
 
 use crate::pattern_utils::{Coord, HexCoord, LineDrawer};
+
+use crate::options::Color;
 
 use super::Pattern;
 
@@ -16,7 +18,7 @@ pub fn draw_monocolor_lines(
     bent_corners: bool,
 ) {
     let mut paint = Paint::default();
-    paint.set_color(color);
+    paint.set_color(color.into());
 
     let mut visit_count: HashMap<Coord, usize> = HashMap::new();
 

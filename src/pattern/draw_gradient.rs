@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
 use tiny_skia::{
-    Color, GradientStop, LinearGradient, Paint, Pixmap, SpreadMode, Stroke, Transform,
+    GradientStop, LinearGradient, Paint, Pixmap, SpreadMode, Stroke, Transform,
 };
 
 use crate::pattern_utils::{Coord, HexCoord, LineDrawer};
+
+use crate::options::Color;
 
 use super::Pattern;
 
@@ -25,6 +27,7 @@ pub fn draw_gradient_lines(
 
     for col in colors.iter().take(pattern.path.len() / segs_per_color + 2) {
         //let col = colors[i];
+        let col = tiny_skia::Color::from(*col);
         grad_colors.push([col.red(), col.green(), col.blue(), col.alpha()]);
     }
 
@@ -62,7 +65,7 @@ pub fn draw_gradient_lines(
     let mut line_drawer = LineDrawer::new(origin, stroke.clone(), paint);
 
     let mut prev_shade_color =
-        Color::from_rgba(cur_color[0], cur_color[1], cur_color[2], cur_color[3]).unwrap();
+        tiny_skia::Color::from_rgba(cur_color[0], cur_color[1], cur_color[2], cur_color[3]).unwrap();
 
     for i in 1..pattern.path.len() {
         let mut loc_next = origin + HexCoord::from(pattern.path[i]) * scale;
@@ -79,7 +82,7 @@ pub fn draw_gradient_lines(
         }
 
         let cur_col =
-            Color::from_rgba(cur_color[0], cur_color[1], cur_color[2], cur_color[3]).unwrap();
+            tiny_skia::Color::from_rgba(cur_color[0], cur_color[1], cur_color[2], cur_color[3]).unwrap();
 
         line_drawer.set_shader(
             LinearGradient::new(

@@ -1,7 +1,7 @@
-use tiny_skia::{Color, FillRule, Paint, PathBuilder, Pixmap, Transform};
+use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Transform};
 
 use crate::{
-    options::Point,
+    options::{Point, Color},
     pattern_utils::{Coord, HexCoord},
 };
 
@@ -18,7 +18,7 @@ pub fn draw_points(
     match point {
         Point::None => (),
         Point::Single(marker) => {
-            paint.set_color(marker.color);
+            paint.set_color(marker.color.into());
             for point in points {
                 let loc = HexCoord::from(*point) * scale + origin;
                 let path = PathBuilder::from_circle(loc.0, loc.1, marker.radius * scale).unwrap();
@@ -26,8 +26,8 @@ pub fn draw_points(
             }
         }
         Point::Double { inner, outer } => {
-            paint.set_color(outer.color);
-            paint2.set_color(inner.color);
+            paint.set_color(outer.color.into());
+            paint2.set_color(inner.color.into());
             for point in points {
                 let loc = HexCoord::from(*point) * scale + origin;
                 let path = PathBuilder::from_circle(loc.0, loc.1, outer.radius * scale).unwrap();
@@ -49,6 +49,6 @@ pub fn draw_points(
 pub fn draw_point(pixmap: &mut Pixmap, center: HexCoord, radius: f32, color: Color) {
     let path = PathBuilder::from_circle(center.0, center.1, radius).unwrap();
     let mut paint = Paint::default();
-    paint.set_color(color);
+    paint.set_color(color.into());
     pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::default(), None);
 }

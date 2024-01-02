@@ -1,8 +1,6 @@
-use tiny_skia::Color;
-
 use crate::{
     defaults,
-    options::{Intersections, Lines, Triangle},
+    options::{Intersections, Lines, Triangle, Color},
     pattern_utils::Angle,
 };
 

@@ -9,8 +9,6 @@ pub mod grids;
 pub mod options;
 pub use options::defaults;
 
-pub use tiny_skia::Color;
-
 /*extern crate test;
 
 #[cfg(test)]

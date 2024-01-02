@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
-use tiny_skia::{Color, LineCap, LineJoin, Pixmap, Stroke};
+use tiny_skia::{LineCap, LineJoin, Pixmap, Stroke};
 
 use crate::{
-    options::{Intersections, Lines, Point},
+    options::{Intersections, Lines, Point, Color},
     pattern_utils::{
         Angle, AngleParseError, ConnectionPoint, Coord, Direction, DirectionParseError,
         DynamicList, HexCoord,

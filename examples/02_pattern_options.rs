@@ -2,12 +2,11 @@ use hex_renderer::{
     grids::{GridDraw, HexGrid},
     options::{
         palettes, CollisionOption, EndPoint, GridOptions, GridPatternOptions, Intersections, Lines,
-        Marker, OverloadOptions, Point, Triangle,
+        Marker, OverloadOptions, Point, Triangle, Color
     },
     pattern_utils::Angle,
     Pattern,
 };
-use tiny_skia::Color;
 
 fn main() {
     //patterns to draw
@@ -68,7 +67,7 @@ fn main() {
 
     //each of these takes a color which is imported via tiny_skia
     //the color format is RGBA (where A is alpha/transparency)
-    let color = Color::from_rgba8(0, 128, 128, 255);
+    let color = Color(0, 128, 128, 255);
 
     //the monocolor type just takes in the color and if it's bent
     //bent is where the lines bend around corners when multiple
@@ -88,11 +87,11 @@ fn main() {
 
     let colors = vec![
         color,
-        Color::from_rgba8(255, 0, 0, 255),
-        Color::from_rgba8(0, 255, 0, 255),
-        Color::from_rgba8(0, 0, 255, 255),
-        Color::from_rgba8(128, 128, 128, 255),
-        Color::from_rgba8(128, 128, 0, 255),
+        Color(255, 0, 0, 255),
+        Color(0, 255, 0, 255),
+        Color(0, 0, 255, 255),
+        Color(128, 128, 128, 255),
+        Color(128, 128, 0, 255),
     ];
 
     let _gradient = Lines::Gradient {
@@ -153,7 +152,7 @@ fn main() {
 
     //this one draws the first line (before collisions)
     //and then draws a dash with the provided color over it
-    let _dashes = CollisionOption::Dashes(Color::from_rgba8(255, 0, 0, 255));
+    let _dashes = CollisionOption::Dashes(Color(255, 0, 0, 255));
 
     //parallel lines just draws the lines parallel to eachother (while shrinking them)
     //so that the colliding lines sort of just push eachother to the side
@@ -168,7 +167,7 @@ fn main() {
 
     //overlaod has 3 options as follows:
     //same as _dashes except it's over the parallel lines
-    let _dashes_overload = OverloadOptions::Dashes(Color::from_rgba8(255, 0, 0, 255));
+    let _dashes_overload = OverloadOptions::Dashes(Color(255, 0, 0, 255));
 
     //same as _matched_dashes
     let _matched_dashes_overload = OverloadOptions::MatchedDashes;
@@ -177,7 +176,7 @@ fn main() {
     //it adds a label off to the side that displays how many colliding lines there are
     //the label is a Marker that specifies the color and the radius of the label (circular)
     let _labeled_dashes_overload = OverloadOptions::LabeledDashes {
-        color: Color::from_rgba8(255, 0, 0, 255),
+        color: Color(255, 0, 0, 255),
         label: Marker {
             color: Color::WHITE,
             radius: 0.4,
@@ -192,11 +191,11 @@ fn main() {
 
     let colors = vec![
         color,
-        Color::from_rgba8(255, 0, 0, 255),
-        Color::from_rgba8(0, 255, 0, 255),
-        Color::from_rgba8(0, 0, 255, 255),
-        Color::from_rgba8(128, 128, 128, 255),
-        Color::from_rgba8(128, 128, 0, 255),
+        Color(255, 0, 0, 255),
+        Color(0, 255, 0, 255),
+        Color(0, 0, 255, 255),
+        Color(128, 128, 128, 255),
+        Color(128, 128, 0, 255),
     ];
 
     //and then, all of that can be combined to make the SegmentColor options
@@ -232,7 +231,7 @@ fn main() {
             radius: 0.07,
         },
         outer: Marker {
-            color: Color::from_rgba8(255, 255, 0, 255),
+            color: Color(255, 255, 0, 255),
             radius: 0.1,
         },
     };
