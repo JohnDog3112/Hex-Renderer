@@ -370,7 +370,7 @@ fn draw_label(
 
     pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
 
-    draw_point(pixmap, point, radius, label.color.into());
+    draw_point(pixmap, point, radius, label.color);
     draw_text(
         pixmap,
         &format!("{collisions}"),
