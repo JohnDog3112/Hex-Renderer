@@ -38,7 +38,13 @@ pub enum GridCreationError {
 }
 
 pub trait GridDraw {
-    fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError>;
+    fn draw_grid_with_padding(&self, scale: f32, options: &GridOptions, padding: f32) -> Result<Pixmap, GridDrawError>;
+
+    fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError> {
+        let max_radius = options.get_max_radius();
+
+        self.draw_grid_with_padding(scale, options, max_radius)
+    }
 
     fn get_unpadded_size(&self) -> (f32, f32);
     fn get_size(&self, options: &GridOptions) -> (f32, f32) {
@@ -75,11 +81,12 @@ pub trait GridDraw {
     }
 }
 
-fn draw_grid(
+fn draw_grid_with_padding(
     size: HexCoord,
     patterns: &Vec<(PatternVariant, HexCoord, f32)>,
     options: &GridOptions,
     scale: f32,
+    padding: f32,
 ) -> Result<Pixmap, GridDrawError> {
     if scale < 1.0 {
         return Err(GridDrawError::ImproperScale(scale));
@@ -152,9 +159,7 @@ fn draw_grid(
         })
         .collect::<Vec<Intersections>>();
 
-    let max_radius = options.get_max_radius();
-
-    let border_size = max_radius * scale;
+    let border_size = padding * scale;
 
     let offset = HexCoord(border_size, border_size);
 

@@ -153,8 +153,8 @@ impl HexGrid {
 }
 
 impl GridDraw for HexGrid {
-    fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError> {
-        super::draw_grid(self.bottom_right, &self.patterns, options, scale)
+    fn draw_grid_with_padding(&self, scale: f32, options: &GridOptions, padding: f32) -> Result<Pixmap, GridDrawError> {
+        super::draw_grid_with_padding(self.bottom_right, &self.patterns, options, scale, padding)
     }
     fn get_unpadded_size(&self) -> (f32, f32) {
         (self.bottom_right.0, self.bottom_right.1)
