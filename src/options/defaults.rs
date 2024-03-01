@@ -1,3 +1,4 @@
+//! This is a set of default values that can be used for rendering patterns
 use lazy_static::lazy_static;
 
 use crate::options::{palettes, GridPatternOptions, Marker, Triangle, Color};

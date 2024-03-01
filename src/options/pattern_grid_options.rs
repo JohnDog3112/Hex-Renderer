@@ -7,23 +7,38 @@ use crate::{
 use super::{defaults::constants, CollisionOption, Point};
 
 #[derive(Clone, Debug)]
+///Main struct for all pattern rendering options
 pub struct GridOptions {
+    ///Thickness of line in relation to distance between points
+    /// eg. if the line_thickness = 0.1, and the distance between points is 10 pixels,
+    /// then the line_thickness would be 1 pixel
     pub line_thickness: f32,
+    ///Further options for how to render each pattern
     pub pattern_options: GridPatternOptions,
+    ///Optional point to place in the center of each pattern (helps with determining pattern size at a glance)
     pub center_dot: Point,
 }
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
+///Struct that holds the different variations of GridPatterns
 pub enum GridPatternOptions {
+    ///Uniform means that all patterns will be rendered in the same way
+    /// (This excludes the difference with PatternVariant)
     Uniform(Intersections, Lines),
+    ///Changes what pattern renderer to use when finding an introspect or retrospect pattern
+    /// That way you can change colors/renderers for embedded patterns
     Changing {
+        ///Variations to use, starts at the first and goes up when it reaches an intro, goes down when reaching a retro
         variations: Vec<(Intersections, Lines)>,
+        ///Vec of the angle_sigs of intro patterns
         intros: Vec<Vec<Angle>>,
+        ///Vec of angle_sigs of retro patterns
         retros: Vec<Vec<Angle>>,
     },
 }
 impl GridOptions {
+    ///Helper function that creates a new [GridOptions] using the default line_thickness: [constants::LINE_THICKNESS]
     pub fn generate(pattern_options: GridPatternOptions, center_dot: Point) -> Self {
         Self {
             line_thickness: constants::LINE_THICKNESS,
@@ -33,6 +48,7 @@ impl GridOptions {
     }
 }
 impl GridPatternOptions {
+    ///Generates a changing [GridPatternOptions] where the [Intersections] options are copied among all variations
     pub fn generate_changing(
         intersection: Intersections,
         lines: Vec<Lines>,
@@ -50,6 +66,8 @@ impl GridPatternOptions {
             retros,
         }
     }
+
+    ///Same as generate_changing except it uses the angle_sigs for Introspection and Retrospection
     pub fn generate_default_changing(intersection: Intersections, lines: Vec<Lines>) -> Self {
         Self::generate_changing(
             intersection,
@@ -58,6 +76,8 @@ impl GridPatternOptions {
             defaults::RETRO_ANGLES.to_vec(),
         )
     }
+
+    ///Generates a changing [GridPatternOptions] where all the variations are a Monocolor renderer
     pub fn gen_changing_monocolor(
         intersection: Intersections,
         colors: Vec<Color>,
@@ -71,6 +91,8 @@ impl GridPatternOptions {
                 .collect(),
         )
     }
+
+    ///Generates a changing [GridPatternOptions] where all the variations are a Gradient renderer
     pub fn gen_changing_gradient(
         intersection: Intersections,
         colors: Vec<Vec<Color>>,
@@ -88,6 +110,8 @@ impl GridPatternOptions {
                 .collect(),
         )
     }
+
+    ///Generates a changing [GridPatternOptions] where all the variations are a Segment renderer
     pub fn gen_changing_segment(
         intersection: Intersections,
         colors: Vec<Vec<Color>>,

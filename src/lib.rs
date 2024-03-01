@@ -1,4 +1,13 @@
 //#![feature(test)]
+
+//! Library for generating images of hex patterns from the [HexCasting mod]()
+//! 
+//! This crate currently includes two different Grids to draw the patterns on as well as many options.
+//! 
+//! **HexGrid** - A hexagonal grid with a maximum width.
+//! **SquareGrid** - Grid of fixed size tiles (squares) that dynamically size the patterns to fit within them.
+//! 
+//! To get started, look at one of the [grids]
 pub mod pattern_utils;
 
 mod pattern;

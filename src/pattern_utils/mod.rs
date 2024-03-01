@@ -1,3 +1,4 @@
+//! Everything related to working with and representing individual patterns
 mod angle;
 pub use angle::{Angle, AngleParseError};
 

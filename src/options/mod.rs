@@ -1,3 +1,4 @@
+//! All structs/enums used to define rendering options
 mod draw_options;
 pub use draw_options::*;
 

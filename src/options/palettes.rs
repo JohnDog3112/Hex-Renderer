@@ -1,3 +1,4 @@
+//! Set of default palettes to use for patterns.
 #![allow(non_snake_case)]
 use lazy_static::lazy_static;
 

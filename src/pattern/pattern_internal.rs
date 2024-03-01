@@ -15,12 +15,18 @@ use super::{
     draw_segments::draw_segment_lines, point::draw_points,
 };
 #[derive(Debug, Clone)]
+///Wrapper around Pattern to specify special cases
 pub enum PatternVariant {
+    ///Draws the pattern normally
     Normal(Pattern),
+    ///Draws the color as monocolor without bends
+    /// For Segment and Gradient renderers, it simply draws it in the starting color.
+    /// For monocolor, it takes out the bends (if applicable)
     Monocolor(Pattern),
 }
 
 #[derive(Debug, Clone)]
+///Represents a pattern to be drawn on a grid
 pub struct Pattern {
     pub(crate) path: Vec<Coord>,
     pub(crate) top_left: Coord,
@@ -39,6 +45,7 @@ pub struct Pattern {
 }
 
 impl Pattern {
+    ///Creates a new pattern with a given start direction and angle_sigs (links)
     pub fn new(rotation: Direction, links: Vec<Angle>) -> Self {
         let mut path = vec![Coord(0, 0), Coord(0, 0) + rotation];
         let mut top_left = path[0].min_components(path[1]);
@@ -124,7 +131,7 @@ impl Pattern {
         }
     }
     #[allow(clippy::too_many_arguments)]
-    pub fn draw_pattern(
+    pub(crate) fn draw_pattern(
         &self,
         pixmap: &mut Pixmap,
         origin: HexCoord,

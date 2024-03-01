@@ -1,3 +1,8 @@
+//! The HexGrid draws all patterns on a Hexagonal Grid similar to how patterns are drawn ingame.
+//! It automatically wraps patterns that would go past the maximum width to the next line and avoids overlaps.
+//! 
+//! The drawing options are within the [GridDraw] trait.
+
 use tiny_skia::Pixmap;
 
 use crate::{
@@ -9,19 +14,29 @@ use crate::{
 
 use super::{GridCreationError, GridDraw, GridDrawError};
 
+
 #[derive(Debug)]
+///Creates a hexagonal grid where patterns are all rendered to fit on the grid.
 pub struct HexGrid {
     patterns: Vec<(PatternVariant, HexCoord, f32)>,
     bottom_right: HexCoord,
 }
 
 impl HexGrid {
+    ///Creates a new [HexGrid] without special cases
+    /// * patterns - Vec of [Pattern] to put on the grid
+    /// * max_width - The width (in grid points) of the grid
     pub fn new_normal(patterns: Vec<Pattern>, max_width: usize) -> Result<Self, GridCreationError> {
         Self::new(
             patterns.into_iter().map(PatternVariant::Normal).collect(),
             max_width,
         )
     }
+
+    ///Creates a new grid with [PatternVariant], allowing special cases (like great spells)
+    /// * patterns - Vec of [PatternVariant] to align on the grid
+    /// * max_width - The width (in grid points) of the grid
+    ///Creates a grid with a vector of PatternVariant for special cases (like great spells), max_widht is the distance (in pixels) between points on the grid.
     pub fn new(patterns: Vec<PatternVariant>, max_width: usize) -> Result<Self, GridCreationError> {
         if patterns.is_empty() {
             return Err(GridCreationError::EmptyPatternList);

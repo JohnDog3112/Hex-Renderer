@@ -1,3 +1,9 @@
+//! All of the grids to draw images on.
+//! 
+//! Includes [SquareGrid] and [HexGrid] which are rendered using [GridDraw]
+//! 
+
+
 mod hex_grid;
 pub use hex_grid::HexGrid;
 
@@ -37,16 +43,28 @@ pub enum GridCreationError {
     EmptyPatternList,
 }
 
+///Set of function for drawing grids
 pub trait GridDraw {
+
+    ///Draws the grid with a given padding around it
+    /// * scale - Size (in pixels) of width (distance between points for [HexGrid], tile_size for [SquareGrid])
+    /// * options - [GridOptions] for rendering the patterns
+    /// * padding - Amount of padding around grid as a percentage of scale
     fn draw_grid_with_padding(&self, scale: f32, options: &GridOptions, padding: f32) -> Result<Pixmap, GridDrawError>;
 
+    ///Draws a grid with padding based on the options
+    /// * scale - Size (in pixels) of width (distance between points for [HexGrid], tile_size for [SquareGrid])
+    /// * options - [GridOptions] for rendering patterns
     fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError> {
         let max_radius = options.get_max_radius();
 
         self.draw_grid_with_padding(scale, options, max_radius)
     }
 
+    ///Size of grid without padding
     fn get_unpadded_size(&self) -> (f32, f32);
+
+    ///Size of grid with automatic padding based on [GridOptions]
     fn get_size(&self, options: &GridOptions) -> (f32, f32) {
         let max_radius = options.get_max_radius();
 
@@ -54,18 +72,27 @@ pub trait GridDraw {
         (max_radius * 2.0 + size.0, max_radius * 2.0 + size.1)
     }
 
+    ///Scale needed to draw a grid that fits within the given bound
+    /// Uses padding generated from [GridOptions]
     fn get_bound_scale(&self, bound: (f32, f32), options: &GridOptions) -> f32 {
         let size = self.get_size(options);
 
         (bound.0 / size.0).min(bound.1 / size.1).max(1.0)
     }
 
+    ///Renders/Draws the image as a png returned as a vector of bytes.
+    /// * scale - Size (in pixels) of width (distance between points for [HexGrid], tile_size for [SquareGrid])
+    /// * options - [GridOptions] for rendering patterns
     fn draw_grid_png(&self, scale: f32, options: &GridOptions) -> Result<Vec<u8>, GridDrawError> {
         self.draw_grid(scale, options)?
             .encode_png()
             .map_err(|_| GridDrawError::EncodeError)
     }
 
+    ///Renders/Draws the image as a png and saves it to the given file
+    /// * file_name - Name of the file to save the image as
+    /// * scale - Size (in pixels) of width (distance between points for [HexGrid], tile_size for [SquareGrid])
+    /// * options - [GridOptions] for rendering patterns
     fn draw_grid_to_file(
         &self,
         file_name: &str,
