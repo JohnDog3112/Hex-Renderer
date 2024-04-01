@@ -1,10 +1,10 @@
 #[allow(dead_code)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 ///Color struct, using RGBA
 pub struct Color(pub u8, pub u8, pub u8, pub u8);
 
 #[allow(dead_code)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 ///Options for drawing the lines of the patterns
 pub enum Lines {
 
@@ -41,7 +41,7 @@ pub enum Lines {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 ///Options for drawing the triangle/arrow between color changes on the Segment Renderer
 pub enum Triangle {
     ///None, simply don't draw them
@@ -68,7 +68,7 @@ pub enum Triangle {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 ///Options for drawing overlapping segments (impossible patterns)
 pub enum CollisionOption {
     ///Draws the first segment and then dashes of the given color for the rest
@@ -87,7 +87,7 @@ pub enum CollisionOption {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 ///Options for what to do when you get too many parallel lines
 pub enum OverloadOptions {
     ///same as [CollisionOption::Dashes] (just draws dashes of the given color over the first line)
@@ -99,7 +99,7 @@ pub enum OverloadOptions {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 ///Options for drawing points at the grid points/intersections
 pub enum Point {
     ///Doesn't draw any points
@@ -110,7 +110,7 @@ pub enum Point {
     Double { inner: Marker, outer: Marker },
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 ///Specifier for how to draw a shape (not necessarily a circle)
 pub struct Marker {
     ///The color to draw it with
@@ -120,7 +120,7 @@ pub struct Marker {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 ///Specifier for how to draw the start and end points on a pattern
 pub enum EndPoint {
     ///Draw a normal point
@@ -132,7 +132,7 @@ pub enum EndPoint {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 ///How to draw all the points in a pattern, including start, end, and middle points
 pub enum Intersections {
     ///Doesn't draw any points

@@ -14,7 +14,7 @@ use super::{
     draw_gradient::draw_gradient_lines, draw_monocolor::draw_monocolor_lines,
     draw_segments::draw_segment_lines, point::draw_points,
 };
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 ///Wrapper around Pattern to specify special cases
 pub enum PatternVariant {
     ///Draws the pattern normally
@@ -25,7 +25,7 @@ pub enum PatternVariant {
     Monocolor(Pattern),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 ///Represents a pattern to be drawn on a grid
 pub struct Pattern {
     pub(crate) path: Vec<Coord>,
@@ -44,6 +44,16 @@ pub struct Pattern {
     pub(crate) collisions: HashMap<ConnectionPoint, i32>,
 }
 
+impl PartialOrd for Pattern {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.path.partial_cmp(&other.path) 
+    }
+}
+impl std::hash::Hash for Pattern {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.path.hash(state);
+    }
+}
 impl Pattern {
     ///Creates a new pattern with a given start direction and angle_sigs (links)
     pub fn new(rotation: Direction, links: Vec<Angle>) -> Self {

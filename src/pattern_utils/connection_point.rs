@@ -1,6 +1,6 @@
 use super::Coord;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Hash)]
 pub struct ConnectionPoint(Coord, Coord);
 
 impl ConnectionPoint {

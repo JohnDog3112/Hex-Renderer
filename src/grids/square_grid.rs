@@ -11,6 +11,7 @@ use crate::{options::GridOptions, Pattern};
 
 use super::{GridCreationError, GridDraw, GridDrawError};
 
+#[derive(Debug, PartialEq, PartialOrd)]
 ///Grid of fixed size tiles where the patterns are automatically scaled to fit within.
 pub struct SquareGrid {
     patterns: Vec<(PatternVariant, HexCoord, f32)>,

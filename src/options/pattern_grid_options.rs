@@ -6,7 +6,7 @@ use crate::{
 
 use super::{defaults::constants, CollisionOption, Point};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 ///Main struct for all pattern rendering options
 pub struct GridOptions {
     ///Thickness of line in relation to distance between points
@@ -20,7 +20,7 @@ pub struct GridOptions {
 }
 
 #[allow(dead_code)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 ///Struct that holds the different variations of GridPatterns
 pub enum GridPatternOptions {
     ///Uniform means that all patterns will be rendered in the same way

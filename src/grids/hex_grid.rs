@@ -15,7 +15,7 @@ use crate::{
 use super::{GridCreationError, GridDraw, GridDrawError};
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, PartialOrd)]
 ///Creates a hexagonal grid where patterns are all rendered to fit on the grid.
 pub struct HexGrid {
     patterns: Vec<(PatternVariant, HexCoord, f32)>,
