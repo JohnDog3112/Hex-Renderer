@@ -58,10 +58,7 @@ pub fn draw_gradient_lines(
             }
         }
     }
-    let paint = Paint::<'_> {
-        anti_alias: false,
-        ..Default::default()
-    };
+    let paint = Paint::default();
     let mut line_drawer = LineDrawer::new(origin, stroke.clone(), paint);
 
     let mut prev_shade_color =

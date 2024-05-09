@@ -1,3 +1,6 @@
 about.hbs
 about.toml
 /target
+
+shell.nix
+*.png
