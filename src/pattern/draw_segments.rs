@@ -139,9 +139,11 @@ pub fn draw_segment_lines(
         };
 
         let not_draw_red = full_dash && visited_count > 0;
-        let not_draw_lines = visited_count >= too_many_lines;
+        let not_draw_lines = collisions >= too_many_lines;
         let not_draw_stripes = stripes && collisions >= too_many_lines;
         let draw = !not_draw_red && !not_draw_lines && !not_draw_stripes;
+
+        println!("{draw}, {visited_count}, {too_many_lines}");
 
         if draw && visited_colors.contains(&cur_color) {
             let middle = (end - start) / 2.0 + start;
