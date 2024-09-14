@@ -36,7 +36,8 @@ fn main() {
 
     //let patterns_str = "NORTH_EAST qaq, EAST aa, NORTH_EAST qaq, EAST wa, WEST qqq, SOUTH_EAST a, SOUTH_EAST wwwdwdwwwawqqeqwqqwqeqwqq, EAST eee, SOUTH_EAST aqaaeaqaa, NORTH_EAST wdwaw, NORTH_EAST dadad";
 
-    let patterns_str = "HexPattern(EAST sss)";
+    // let patterns_str = "HexPattern(EAST sss)";
+    let patterns_str = "EAST wwwqq, EAST a, NORTH_WEST a, SOUTH_WEST a";
 
     let patterns: Vec<Pattern> = patterns_str
         .split(", ")
@@ -80,29 +81,50 @@ fn main() {
     //     ),
     //     center_dot: options::Point::None,
     // };
+    // let grid_options = GridOptions {
+    //     line_thickness: options::defaults::constants::LINE_THICKNESS,
+    //     pattern_options: options::GridPatternOptions::gen_changing_segment(
+    //         options::Intersections::UniformPoints(options::Point::Single(Marker {
+    //             color: Color(255, 255, 255, 255),
+    //             radius: 0.07,
+    //         })),
+    //         options::palettes::ALL.to_vec(),
+    //         options::Triangle::BorderStartMatch {
+    //             match_radius: 0.15,
+    //             border: Marker {
+    //                 color: Color(255, 255, 255, 255),
+    //                 radius: 0.1,
+    //             },
+    //         },
+    //         options::CollisionOption::OverloadedParallel {
+    //             max_line: 3,
+    //             overload: options::OverloadOptions::Dashes(Color(255, 0, 0, 255)),
+    //         },
+    //     ),
+    //     center_dot: options::Point::None,
+    // };
+
     let grid_options = GridOptions {
-        line_thickness: options::defaults::constants::LINE_THICKNESS,
-        pattern_options: options::GridPatternOptions::gen_changing_segment(
-            options::Intersections::UniformPoints(options::Point::Single(Marker {
-                color: Color(255, 255, 255, 255),
-                radius: 0.07,
-            })),
-            options::palettes::ALL.to_vec(),
-            options::Triangle::BorderStartMatch {
-                match_radius: 0.15,
-                border: Marker {
-                    color: Color(255, 255, 255, 255),
-                    radius: 0.1,
-                },
-            },
-            options::CollisionOption::OverloadedParallel {
-                max_line: 3,
-                overload: options::OverloadOptions::Dashes(Color(255, 0, 0, 255)),
-            },
+        line_thickness: 0.12,
+        pattern_options: options::GridPatternOptions::Uniform(
+            options::Intersections::UniformPoints(
+                options::Point::Single(
+                    Marker { 
+                        color: Color(255, 255, 255, 255), 
+                        radius: 0.16 
+                    }
+                )
+            ), 
+            options::Lines::SegmentColors { 
+                colors: vec![Color(255, 255, 255, 255)], 
+                triangles: options::Triangle::None, 
+                collisions: options::CollisionOption::ParallelLines 
+            }
         ),
-        center_dot: options::Point::None,
+        center_dot: options::Point::None
     };
-    let grid = HexGrid::new(variants, 40).unwrap();
+
+    let grid = HexGrid::new(variants, 6).unwrap();
     grid.draw_grid_to_file("image.png", global_scale, &grid_options)
         .unwrap();
 }

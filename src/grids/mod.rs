@@ -58,7 +58,7 @@ pub trait GridDraw {
     fn draw_grid(&self, scale: f32, options: &GridOptions) -> Result<Pixmap, GridDrawError> {
         let max_radius = options.get_max_radius();
 
-        self.draw_grid_with_padding(scale, options, max_radius)
+        self.draw_grid_with_padding(scale, options, max_radius * 1.1)
     }
 
     ///Size of grid without padding
@@ -69,7 +69,7 @@ pub trait GridDraw {
         let max_radius = options.get_max_radius();
 
         let size = self.get_unpadded_size();
-        (max_radius * 2.0 + size.0, max_radius * 2.0 + size.1)
+        (max_radius * 2.0 * 1.1 + size.0, max_radius * 2.0 * 1.1 + size.1)
     }
 
     ///Scale needed to draw a grid that fits within the given bound

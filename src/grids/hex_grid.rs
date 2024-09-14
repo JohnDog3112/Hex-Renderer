@@ -60,6 +60,7 @@ impl HexGrid {
             let pattern = &patterns[index].get_inner();
             let height = pattern.bottom_right.1 - pattern.top_left.1;
 
+
             if index == 0 {
                 current_x -= pattern.top_left.0;
                 let mut left_most = f32::MAX;
@@ -133,6 +134,16 @@ impl HexGrid {
             }
 
             let loc = Coord(current_x + current_x_offset, current_y - pattern.top_left.1);
+            
+            if index == patterns.len() - 1 {
+                for point in &patterns[index].get_inner().right_perimiter {
+                    let point = HexCoord::from(*point + loc);
+                    if point.0 > max_x {
+                        max_x = point.0;
+                    }
+                }
+            }
+
             locations.push(loc);
         }
 
@@ -156,7 +167,6 @@ impl HexGrid {
             let location = HexCoord::from(locations[i]) - left_offset;
             packed_patterns.push((pattern, location, 1.0));
         }
-
         Ok(HexGrid {
             patterns: packed_patterns,
             bottom_right: HexCoord(
