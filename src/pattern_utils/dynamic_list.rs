@@ -49,7 +49,7 @@ impl<T> DynamicList<T> {
     pub fn get(&self, index: i32) -> &Option<T> {
         let offset_index = (index - self.lower_bound) as usize;
 
-        if offset_index > self.contents.len() {
+        if offset_index >= self.contents.len() {
             &None
         } else {
             &self.contents[offset_index]
