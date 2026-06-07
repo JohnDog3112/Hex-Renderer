@@ -56,6 +56,8 @@ impl HexGrid {
 
         let mut offset_left = true;
 
+        let mut overflow_offsets: Vec<Coord> = Vec::new();
+
         for index in 0..patterns.len() {
             let pattern = &patterns[index].get_inner();
             let height = pattern.bottom_right.1 - pattern.top_left.1;
@@ -79,29 +81,29 @@ impl HexGrid {
             } else {
                 let prev_pattern = patterns[index - 1].get_inner();
                 let mut max_distance_decrease = i32::MAX;
-                for i in 0..pattern
-                    .left_perimiter
-                    .len()
-                    .min(prev_pattern.left_perimiter.len())
-                {
+                for i in 0..pattern.left_perimiter.len().min(prev_pattern.right_perimiter.len() + overflow_offsets.len()) {
                     let right_point = pattern.left_perimiter[i].0;
-                    let left_point = prev_pattern.right_perimiter[i].0;
+                    let left_point = prev_pattern.right_perimiter.get(i).or_else(|| overflow_offsets.get(i - prev_pattern.right_perimiter.len())).unwrap().0;
 
                     let dist = right_point - left_point;
 
-                    //println!("{} - {} = {}", right_point, left_point, dist);
 
                     if dist < max_distance_decrease {
                         max_distance_decrease = dist;
                     }
                 }
-                //println!("max: {}", max_distance_decrease);
+                overflow_offsets = Vec::new();
+                for i in pattern.right_perimiter.len()..prev_pattern.right_perimiter.len() {
+                    let overflow_val = prev_pattern.right_perimiter[i].0 - max_distance_decrease - 1;
+                    overflow_offsets.push(Coord(overflow_val, 0));
+                }
                 current_x -= max_distance_decrease - 1;
             }
 
             if HexCoord::from(Coord(current_x + pattern.bottom_right.0, max_y_row)).0 > max_width
                 && index != 0
             {
+                overflow_offsets = Vec::new();
                 current_x = -pattern.top_left.0;
                 current_y += max_y_row + 1;
 
