@@ -88,6 +88,7 @@ pub fn draw_segment_lines(
     let mut ended_on_collision = false;
 
     let mut visited: HashMap<ConnectionPoint, (i32, Coord)> = HashMap::new();
+    let mut starting_triangle_params: Option<(HexCoord, HexCoord, f32)> = None;
 
     for i in 0..pattern.path.len() {
         let point = &pattern.path[i];
@@ -144,6 +145,10 @@ pub fn draw_segment_lines(
         let draw = !not_draw_red && !not_draw_lines && !not_draw_stripes;
 
 
+        if draw && i == 1 {
+            let middle = (end - start) / 2.0 + start;
+            starting_triangle_params = Some((middle, end, triangle_scale));
+        }
         if draw && visited_colors.contains(&cur_color) {
             let middle = (end - start) / 2.0 + start;
 
@@ -246,7 +251,13 @@ pub fn draw_segment_lines(
     let mid_point = (cur_loc - prev_loc) / 2.0 + prev_loc;
 
     if let Some(marker) = triangles.to_start_point(colors[0]) {
-        draw_triangle(marker, pixmap, mid_point, cur_loc, scale);
+        if let Some((middle, end, scalar)) = starting_triangle_params {
+            println!("{:?}, {:?}", middle, end);
+            println!("{:?}, {:?}", mid_point, cur_loc);
+            draw_triangle(marker, pixmap, middle, end, scale * scalar);
+        } else {
+            draw_triangle(marker, pixmap, mid_point, cur_loc, scale);
+        }
     }
     drawer.draw_priority(pixmap);
 

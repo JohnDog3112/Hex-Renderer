@@ -38,7 +38,8 @@ fn main() {
 
     // let patterns_str = "HexPattern(EAST sss)";
     // let patterns_str = "EAST wedqawqeewdeaqeewdeaqqedqawqqedqawqeedqawqqewdeaqeedqawqeewdeaqqewdeaqeewdeaqeedqawqqedqawqqewdeaqeedqawqeewdeaqqewdeaqeewdeaqeedqawqqedqawqqewdeaqqedqawqeewdeaqeewdeaqqedqawqqedqawqeedqawqqewdeaqqedqawqeewdeaqeewdeaqqedqawqqedqawqeedqawqqewdeaqeedqawqeewdeaqeewdeaqqedqawqqedqawqeedqawqqewdeaqqedqawqeewdeaqqewdeaqeewdeaqeedqawqqedqawqqewdeaqe";
-    let patterns_str = "SOUTH_WEST waw, SOUTH_WEST a, SOUTH_EAST wdw";
+    // let patterns_str = "SOUTH_WEST waw, SOUTH_WEST a, SOUTH_EAST wdw";
+    let patterns_str = "EAST aaaa, EAST aaaaa, EAST aaa";
 
     let patterns: Vec<Pattern> = patterns_str
         .split(", ")
@@ -105,26 +106,27 @@ fn main() {
     //     center_dot: options::Point::None,
     // };
 
-    let grid_options = GridOptions {
-        line_thickness: 0.12,
-        pattern_options: options::GridPatternOptions::Uniform(
-            options::Intersections::UniformPoints(
-                options::Point::Single(
-                    Marker { 
-                        color: Color(255, 255, 255, 255), 
-                        radius: 0.16 
-                    }
-                )
-            ), 
-            options::Lines::SegmentColors { 
-                // colors: vec![Color(255, 255, 255, 255)], 
-                colors: options::palettes::DEFAULT.to_vec(),
-                triangles: options::Triangle::None, 
-                collisions: options::CollisionOption::ParallelLines 
-            }
-        ),
-        center_dot: options::Point::None
-    };
+    // let grid_options = GridOptions {
+    //     line_thickness: 0.12,
+    //     pattern_options: options::GridPatternOptions::Uniform(
+    //         options::Intersections::UniformPoints(
+    //             options::Point::Single(
+    //                 Marker { 
+    //                     color: Color(255, 255, 255, 255), 
+    //                     radius: 0.16 
+    //                 }
+    //             )
+    //         ), 
+    //         options::Lines::SegmentColors { 
+    //             // colors: vec![Color(255, 255, 255, 255)], 
+    //             colors: options::palettes::DEFAULT.to_vec(),
+    //             triangles: options::Triangle::None, 
+    //             collisions: options::CollisionOption::ParallelLines 
+    //         }
+    //     ),
+    //     center_dot: options::Point::None
+    // };
+    let grid_options = options::defaults::SEGMENT.clone();
 
     let grid = HexGrid::new(variants, 40).unwrap();
     grid.draw_grid_to_file("image.png", global_scale, &grid_options)
