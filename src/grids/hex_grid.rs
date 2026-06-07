@@ -92,9 +92,14 @@ impl HexGrid {
                         max_distance_decrease = dist;
                     }
                 }
+                let old_overflow_offsets = overflow_offsets;
                 overflow_offsets = Vec::new();
-                for i in pattern.right_perimiter.len()..prev_pattern.right_perimiter.len() {
-                    let overflow_val = prev_pattern.right_perimiter[i].0 - max_distance_decrease - 1;
+                for i in pattern.right_perimiter.len()..prev_pattern.right_perimiter.len()+old_overflow_offsets.len() {
+                    let overflow_val = if i < prev_pattern.right_perimiter.len() {
+                        prev_pattern.right_perimiter[i].0 + max_distance_decrease - 1
+                    } else {
+                        old_overflow_offsets[i - prev_pattern.right_perimiter.len()].0 + max_distance_decrease - 1
+                    };
                     overflow_offsets.push(Coord(overflow_val, 0));
                 }
                 current_x -= max_distance_decrease - 1;

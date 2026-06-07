@@ -38,8 +38,8 @@ fn main() {
 
     // let patterns_str = "HexPattern(EAST sss)";
     // let patterns_str = "EAST wedqawqeewdeaqeewdeaqqedqawqqedqawqeedqawqqewdeaqeedqawqeewdeaqqewdeaqeewdeaqeedqawqqedqawqqewdeaqeedqawqeewdeaqqewdeaqeewdeaqeedqawqqedqawqqewdeaqqedqawqeewdeaqeewdeaqqedqawqqedqawqeedqawqqewdeaqqedqawqeewdeaqeewdeaqqedqawqqedqawqeedqawqqewdeaqeedqawqeewdeaqeewdeaqqedqawqqedqawqeedqawqqewdeaqqedqawqeewdeaqqewdeaqeewdeaqeedqawqqedqawqqewdeaqe";
-    // let patterns_str = "SOUTH_WEST waw, SOUTH_WEST a, SOUTH_EAST wdw";
-    let patterns_str = "EAST aaaa, EAST aaaaa, EAST aaa";
+    let patterns_str = "SOUTH_WEST wawww, SOUTH_WEST a, SOUTH_WEST a, SOUTH_EAST wdw, SOUTH_WEST waw, SOUTH_WEST a, SOUTH_EAST wdw";
+    // let patterns_str = "EAST aaaa, EAST aaaaa, EAST aaa";
 
     let patterns: Vec<Pattern> = patterns_str
         .split(", ")
