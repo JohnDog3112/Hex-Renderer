@@ -252,8 +252,6 @@ pub fn draw_segment_lines(
 
     if let Some(marker) = triangles.to_start_point(colors[0]) {
         if let Some((middle, end, scalar)) = starting_triangle_params {
-            println!("{:?}, {:?}", middle, end);
-            println!("{:?}, {:?}", mid_point, cur_loc);
             draw_triangle(marker, pixmap, middle, end, scale * scalar);
         } else {
             draw_triangle(marker, pixmap, mid_point, cur_loc, scale);
